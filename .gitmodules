@@ -1,9 +1,6 @@
 [submodule "Dependencies/yoga_cpp"]
 	path = Dependencies/yoga_cpp
 	url = https://github.com/antopilo/yoga_cpp.git
-[submodule "Dependencies/--force"]
-	path = Dependencies/--force
-	url = https://github.com/antopilo/NuakeRenderer.git
 [submodule "Dependencies/NuakeRenderer"]
 	path = Dependencies/NuakeRenderer
 	url = https://github.com/antopilo/NuakeRenderer.git

@@ -1,0 +1,13 @@
+CMakeFiles/
+NuakeUI.dir/
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+cmake_install.cmake
+INSTALL.vcxproj
+INSTALL.vcxproj.filters
+NuakeUI.sln
+NuakeUI.vcxproj
+NuakeUI.vcxproj.filters
+NuakeUI.vcxproj.user
+Debug/NuakeUI.lib
+Debug/NuakeUI.pdb

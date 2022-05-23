@@ -2,19 +2,38 @@
 
 namespace NuakeUI
 {
-	union StyleLength
+	enum class LengthUnit
 	{
-		int Pixel;
-		float Percent;
-		bool Relative;
+		Pixel, Percentage, Constraint
 	};
 
-	enum class StyleKey
+	struct Length
 	{
+		LengthUnit Unit;
+		float Value;
+	};
+
+	struct Margin
+	{
+		float Bottom;
+		float Left;
+		float Right;
+		float Top;
+	};
+
+	enum class Styles
+	{
+		Width, Height, Margin, Padding
+	};
+
+
+	enum class ValueType
+	{
+		Float, Length, Color,
 
 	};
 
-	class Style
+	struct StyleValue
 	{
 
 	};

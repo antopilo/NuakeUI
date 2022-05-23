@@ -4,3 +4,6 @@
 [submodule "Dependencies/NuakeRenderer"]
 	path = Dependencies/NuakeRenderer
 	url = https://github.com/antopilo/NuakeRenderer.git
+[submodule "Dependencies/msdf-atlas-gen"]
+	path = Dependencies/msdf-atlas-gen
+	url = https://github.com/antopilo/msdf-atlas-gen.git

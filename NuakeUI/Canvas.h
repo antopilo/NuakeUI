@@ -1,5 +1,7 @@
 #pragma once
 #include "Node.h"
+#include "InputManager.h"
+
 #include <NuakeRenderer/Math.h>
 #include <memory>
 
@@ -18,6 +20,11 @@ namespace NuakeUI
 		void Draw();
 		void Calculate(Vector2 size);
 
+		void SetInputManager(InputManager* manager)
+		{
+			InputManager = manager;
+		}
+
 		template<class T> 
 		std::shared_ptr<T> FindNodeByID(const std::string & id)
 		{
@@ -32,5 +39,6 @@ namespace NuakeUI
 	private:
 		YGConfigRef mYogaConfig;
 		std::shared_ptr<Node> mRootNode;
+		InputManager* InputManager;
 	};
 }

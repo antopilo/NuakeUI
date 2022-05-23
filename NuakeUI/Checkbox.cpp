@@ -1,21 +1,29 @@
-#include "Button.h"
-
+#include "Checkbox.h"
 
 namespace NuakeUI
 {
-	std::shared_ptr<Button> Button::New(const std::string& name, const std::string& label)
+	Checkbox::Checkbox(const std::string& id)
 	{
-		return std::make_shared<Button>(name, label);
-	}
-
-	Button::Button(const std::string& name, const std::string& label) :
-		Label(label)
-	{
-		ID = name;
+		ID = id;
 		mNode = YGNodeNew();
+
+		// Default Styling
+		Style.border = 8.f;
+		SetWidthPixel(20.f); SetHeightPixel(20.f);
+		Style.border_color = { 0.1f, 0.1f, 0.1f, 1.0f };
 	}
 
-	void Button::UpdateInput(InputManager* inputManager)
+	std::shared_ptr<Checkbox> Checkbox::New(const std::string& name)
+	{
+		return std::make_shared<Checkbox>(name);
+	}
+
+	void Checkbox::Tick()
+	{
+
+	}
+
+	void Checkbox::UpdateInput(InputManager* inputManager)
 	{
 		float mx = inputManager->GetMouseX();
 		float my = inputManager->GetMouseY();
@@ -31,9 +39,7 @@ namespace NuakeUI
 			{
 				if (mState == State::Pressed && !isMouseDown)
 				{
-					// Calling the click callback.
-					if (ClickCallback)
-						ClickCallback();
+					mChecked = !mChecked;
 				}
 				mState = State::Hover;
 			}
@@ -45,10 +51,5 @@ namespace NuakeUI
 
 		for (auto& c : Childrens)
 			c->UpdateInput(inputManager);
-	}
-
-	void Button::Tick()
-	{
-		
 	}
 }

@@ -1,9 +1,12 @@
 #pragma once
+#include "InputManager.h"
+
+#include <NuakeRenderer/Math.h>
 #include <yoga/yoga.h>
+
 #include <map>
 #include <vector>
 #include <string>
-#include <NuakeRenderer/Math.h>
 
 namespace NuakeUI
 {
@@ -14,21 +17,47 @@ namespace NuakeUI
 		float border = 0.f;
 	};
 
+	enum class State
+	{
+		Idle, Hover, Pressed, Clicked
+	};
+
 	class Node
 	{
+	protected:
+		std::string ID = ""; // Name of the node in the tree
+		YGNodeRef mNode; // Yoga_CPP nodes.
+		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
+
+		State mState = State::Idle;
 	public:
-		NodeStyle Style;
+		NodeStyle Style; // The current visual styles.
+		
+		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
 
-		std::vector<std::string> Classes = std::vector<std::string>();
-		std::string ID = "";
-
+		// Should be used to creates nodes since it creates a shared_ptr for you.
 		static std::shared_ptr<Node> New(const std::string id);
 
+		Node(const std::string& id); // Do not use.
 		Node() = default;
-		Node(const std::string& id);
 		~Node() = default;
 
+	public:
+		virtual void Draw(int z);
+		virtual void UpdateInput(InputManager* manager);
+		virtual void Tick();
+
+		// Calculates the layout.
+		void Calculate(); 
+
+		bool IsMouseHover(float x, float y);
+		State GetState() const { return mState; }
+
 		YGNodeRef GetYogaNode() const { return mNode; }
+		std::string GetID() const { return ID; }
+
+		// Childrens
+		std::vector<std::shared_ptr<Node>> GetChildrens() const;
 
 		void InsertChild(std::shared_ptr<Node> child);
 
@@ -49,14 +78,12 @@ namespace NuakeUI
 					return std::static_pointer_cast<T>(c);
 			}
 
-			// Node not found.
-			assert(false); 
+			assert(false);  // Node not found.
 		}
 
 		template<class T>
 		std::shared_ptr<T> FindChildByID(const std::string& id)
 		{
-			assert(Childrens.size() > 0); // No childrens.
 			for (auto& c : Childrens)
 			{
 				if (c->ID == id)
@@ -69,14 +96,6 @@ namespace NuakeUI
 
 			return nullptr;
 		}
-
-		std::vector<std::shared_ptr<Node>> GetChildrens() const;
-
-		virtual void Draw(int z);
-		void Tick();
-		void Calculate();
-
-		std::string GetID() const { return ID; }
 
 		void SetHeightPixel(float h)  const { YGNodeStyleSetHeight(mNode, h); }
 		void SetWidthPixel(float w)    const { YGNodeStyleSetWidth(mNode, w); }
@@ -91,8 +110,5 @@ namespace NuakeUI
 		void SetAlignItem(YGAlign align) const { YGNodeStyleSetAlignItems(mNode, align); }
 		void SetBorder(float w)  { Style.border = w; }
 		void SetBorderColor(Color c) { Style.border_color = c; }
-		YGNodeRef mNode;
-	private:
-		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
 	};
 }

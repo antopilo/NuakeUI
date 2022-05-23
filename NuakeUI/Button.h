@@ -1,19 +1,16 @@
 #pragma once
-#include <string>
 #include "Node.h"
+#include "InputManager.h"
+
+#include <string>
 
 namespace NuakeUI
 {
-	enum class ButtonState
-	{
-		Normal, Hover, Pressed
-	};
-
 	class Button : public Node
 	{
+	private:
+		bool mHasBeenClicked = false;
 	public:
-		ButtonState State = ButtonState::Normal;
-
 		std::string Label = "";
 
 		Button(const std::string& name, const std::string& label);
@@ -24,7 +21,8 @@ namespace NuakeUI
 		void (*ClickCallback)();
 
 		void Draw();
-		void Tick();
+		void Tick() override;
+		void UpdateInput(InputManager* inputManager) override;
 
 		void SetClickCallback(void(*callback)())
 		{

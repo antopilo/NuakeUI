@@ -29,6 +29,14 @@ namespace NuakeUI
 		return mRootNode;
 	}
 
+	void Canvas::Tick()
+	{
+		assert(mRootNode); // The canvas doesn't have any root set.
+
+		mRootNode->UpdateInput(InputManager);
+		mRootNode->Tick();
+	}
+
 	void Canvas::Draw()
 	{
 		if (mRootNode)
@@ -42,6 +50,10 @@ namespace NuakeUI
 	void Canvas::Calculate(Vector2 size)
 	{
 		Renderer::Get().SetViewportSize(size);
+
+		float x, y;
+		x = InputManager->GetMouseX();
+		y = InputManager->GetMouseY();
 
 		auto root = mRootNode->GetYogaNode();
 		if (root)

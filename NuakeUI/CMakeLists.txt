@@ -9,4 +9,4 @@ InputManager.h Text.h Text.cpp
 StyleSheet.h 
 )
 
-target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore)
+target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore msdf-gen-atlas)

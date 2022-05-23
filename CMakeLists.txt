@@ -12,5 +12,8 @@ include_directories(./Dependencies/NuakeRenderer/)
 add_subdirectory(./Dependencies/yoga_cpp)
 include_directories(./Dependencies/yoga_cpp/)
 
+add_subdirectory(./Dependencies/msdf-atlas-gen)
+include_directories(./Dependencies/msdf-atlas-gen/msdf-atlas-gen)
+
 
 

@@ -1,6 +1,7 @@
 #include "Text.h"
 
 #include "Renderer.h"
+#include <sstream>
 
 namespace NuakeUI
 {
@@ -15,33 +16,37 @@ namespace NuakeUI
 		mNode = YGNodeNew();
 		mType = NodeType::Text;
 
+		// Split into lines
+		auto ss = std::stringstream{ text };
+		for (std::string line; std::getline(ss, line, '\n');)
+			Lines.push_back(line);
+
 		mFont = Renderer::Get().mDefaultFont;
-		//YGNodeStyleSetPadding(mNode, YGEdgeAll, 4.f);
-		YGNodeStyleSetMinHeight(mNode, (mFont->LineHeight / 32.f) * FontStyle.FontSize);
+
+		YGNodeStyleSetMinHeight(mNode, ((mFont->LineHeight) / 32.f) * FontStyle.FontSize * Lines.size());
 		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
 		YGNodeStyleSetWidthPercent(mNode, 100.f);
 	}
 
 	void Text::Draw(int z)
 	{
-		Matrix4 transform = Matrix4(1.0f);
-		float width = YGNodeLayoutGetWidth(mNode);
-		float height = YGNodeLayoutGetHeight(mNode);
-		float left = YGNodeLayoutGetLeft(mNode); //+ offset.x;
-		float top = YGNodeLayoutGetTop(mNode);// +offset.y;
+		const float width = YGNodeLayoutGetWidth(mNode);
+		const float height = YGNodeLayoutGetHeight(mNode);
+
+		float left = YGNodeLayoutGetLeft(mNode); 
+		float top = YGNodeLayoutGetTop(mNode);
+
+		// Centers the text in the line height.
 		top += (mFont->LineHeight / 64.0) * (FontStyle.FontSize) / 2.0f;
-		const float padding = YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
-		left += padding;
-		top += YGNodeLayoutGetPadding(mNode, YGEdgeTop);
+
+		const float paddingLeft = YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
+		const float paddingTop = YGNodeLayoutGetPadding(mNode, YGEdgeTop);
+		left += paddingLeft;
+		top += paddingTop;
 
 		float parentLeft = 0.0f;
 		float parentTop = 0.0f;
 		auto parent = YGNodeGetParent(mNode);
-
-		float maxWidth = 0;
-		if (parent)
-			maxWidth = YGNodeLayoutGetWidth(parent);
-
 		while (parent)
 		{
 			parentLeft += YGNodeLayoutGetLeft(parent);
@@ -49,32 +54,55 @@ namespace NuakeUI
 			parent = YGNodeGetParent(parent);
 		}
 
-		Vector3 position = Vector3(left + parentLeft, top + parentTop, z);
-		if (FontStyle.Alignment == TextAlign::Center)
-			position.x += (width / 2.0f) - CalculateWidth() / 2.0f;
-		else if (FontStyle.Alignment == TextAlign::Right)
-			position.x += width - CalculateWidth();
+		const float leftPosition = left + parentLeft;
+		const float topPosition = top + parentTop;
+		Vector3 position = Vector3(leftPosition, topPosition, z);
 
-		Renderer::Get().DrawString(this->Value, FontStyle, mFont, position);
+		if (FontStyle.Alignment == TextAlign::Center)
+		{
+			// We center the text horizontally.
+			position.x += (width / 2.0f) - CalculateWidth() / 2.0f;
+		}
+		else if (FontStyle.Alignment == TextAlign::Right)
+		{
+			// Aligns the line of the left
+			position.x += width - CalculateWidth(); 
+		}
+
+		// Draw each line and offset the Y of the position by the line height.
+		for(int i = 1; i < Lines.size(); i++)
+		{
+			// Draw the first line
+			Renderer::Get().DrawString(Lines[i], FontStyle, mFont, position);
+			// Update the Y position to the next line.
+			position.y += (mFont->LineHeight / 32.0f) * (FontStyle.FontSize);
+		}
 	}
 
 	float Text::CalculateWidth()
 	{
+		// If theres no text, then assume it's 0;
 		if (Value == "") return 0.f;
-		float width = 0.f;
-		float fs = FontStyle.FontSize / 64.f;
-		float advance = 0.0f;
+
+		const float fontSize = FontStyle.FontSize / 64.f;
+		float textWidth = 0.f;
+
+		// Iterate over each character and add up the advance.
 		for (char const& c : Value)
 		{
 			Char& letter = mFont->GetChar((int)c);
-			width += (letter.Advance);
+			textWidth += (letter.Advance);
 		}
-		return width * fs;
+
+		// Scale the width by the font size.
+		return textWidth * fontSize;
 	}
 
 	void Text::Calculate()
 	{
+		const float halfLineHeight = mFont->LineHeight / 32.f;
+		const float linesHeight = Lines.size() * FontStyle.FontSize;
+		YGNodeStyleSetMinHeight(mNode, halfLineHeight * linesHeight);
 		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
-		YGNodeStyleSetMinHeight(mNode, (mFont->LineHeight / 32.f) * FontStyle.FontSize);
 	}
 }

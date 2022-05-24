@@ -55,7 +55,7 @@ namespace NuakeUI
 	void Renderer::SetViewportSize(const Vector2& size)
 	{
 		mSize = size;
-		mView = glm::ortho(0.f, size.x, size.y, 0.f);
+		mView = glm::ortho(0.f, size.x, size.y, 0.f, -1000.f, 10000.f);
 	}
 
 	void Renderer::BeginDraw()
@@ -145,7 +145,7 @@ namespace NuakeUI
 			mSDFShader->SetUniforms({
 				{ "u_View", mView },
 				{ "u_Model", model },
-				{ "u_Atlas", 5 },
+				{ "u_Atlas", (int)5 },
 				{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
 				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
 				{ "u_BGColor",   style.BackgroundColor },

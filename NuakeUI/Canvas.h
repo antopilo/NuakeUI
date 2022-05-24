@@ -29,8 +29,8 @@ namespace NuakeUI
 			InputManager = manager;
 		}
 
-		template<class T> 
-		std::shared_ptr<T> FindNodeByID(const std::string & id)
+		template<class T>
+		std::shared_ptr<T> FindNodeByID(const std::string& id)
 		{
 			assert(root != nullptr); // No Root has been set.
 
@@ -41,6 +41,7 @@ namespace NuakeUI
 		}
 
 	private:
+		std::string mFilePath = "";
 		YGConfigRef mYogaConfig;
 		std::shared_ptr<Node> mRootNode;
 		InputManager* InputManager;

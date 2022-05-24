@@ -13,6 +13,9 @@ namespace NuakeUI
 		assert(id != "");
 		mNode = YGNodeNew();
 		Childrens = std::vector<std::shared_ptr<Node>>();
+
+		YGNodeStyleSetWidthAuto(mNode);
+		YGNodeStyleSetWidthAuto(mNode);
 	}
 
 	void Node::Tick()

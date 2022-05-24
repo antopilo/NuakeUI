@@ -23,6 +23,7 @@ namespace NuakeUI
 	class Text : public Node
 	{
 	public:
+		std::vector<std::string> Lines;
 		std::string Value = "";
 		std::shared_ptr<Font> mFont;
 

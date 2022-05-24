@@ -24,8 +24,8 @@ namespace NuakeUI
 	struct NodeStyle
 	{
 		Color background_color;
-		Color border_color;
-		float border = 0.f;
+		Color border_color = Color(1, 0, 0, 1);
+		float border = 3.f;
 		Length Width;
 		Length Height;
 		Length MinWidth;

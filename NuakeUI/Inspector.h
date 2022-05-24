@@ -16,16 +16,36 @@ namespace NuakeUI
 		ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | 
 			ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
 
+		// Highlight the selected node using a flag.
 		if (mSelectedNode == node)
 			base_flags |= ImGuiTreeNodeFlags_Selected;
 
-		const bool nodeOpen = ImGui::TreeNodeEx(node->GetID().c_str(), base_flags);
+		// Appends the classes of the node next to the name
+		// Logic is only add [] if theres is a class and only add commans in between.
+		std::string nodeTitle = node->GetID();
+		const int classAmount = node->Classes.size();
+		if (classAmount > 0)
+		{
+			nodeTitle += "[";
+			for (int i = 0; i < classAmount; i++)
+			{
+				nodeTitle += node->Classes[i];
 
+				if (i < classAmount - 1)
+					nodeTitle += ", ";
+			}
+			nodeTitle += "]";
+		}
+		
+		const bool nodeOpen = ImGui::TreeNodeEx(nodeTitle.c_str(), base_flags);
+
+		// Select the if clicked
 		if (ImGui::IsItemClicked())
 		{
 			mSelectedNode = node;
 		}
 
+		// Draw the rest of th nodes recursively.
 		if (nodeOpen)
 		{
 			for (auto& c : node->GetChildrens())
@@ -44,8 +64,6 @@ namespace NuakeUI
 		}
 
 		auto type = mSelectedNode->GetType();
-
-
 
 		ImGui::ColorEdit4("Background Color", (float*) &mSelectedNode->Style.background_color);
 		ImGui::Separator();
@@ -69,23 +87,38 @@ namespace NuakeUI
 
 		if (ImGui::Begin("Inspector"))
 		{
-			const float treeWidth = ImGui::GetWindowContentRegionWidth();
-			const float availHeight = ImGui::GetContentRegionAvail().y;
-			const ImVec2 size = ImVec2(treeWidth * 0.33f, availHeight);
-			const ImVec2 size2 = ImVec2(treeWidth * 0.66f, availHeight);
-			if (ImGui::BeginChild("Tree", size))
+			if (ImGui::BeginTabBar("MyTabBar"))
 			{
-				DrawUI(canvas->GetRootNode());
-			}
-			ImGui::EndChild();
+				if (ImGui::BeginTabItem("Tree"))
+				{
+					const float treeWidth = ImGui::GetWindowContentRegionWidth();
+					const float availHeight = ImGui::GetContentRegionAvail().y;
+					const ImVec2 size = ImVec2(treeWidth * 0.33f, availHeight);
+					const ImVec2 size2 = ImVec2(treeWidth * 0.66f, availHeight);
+					if (ImGui::BeginChild("Tree", size))
+					{
+						DrawUI(canvas->GetRootNode());
+					}
+					ImGui::EndChild();
 
-			ImGui::SameLine();
+					ImGui::SameLine();
 
-			if (ImGui::BeginChild("Editor", size2))
-			{
-				DrawNodeEditor();
+					if (ImGui::BeginChild("Editor", size2))
+					{
+						DrawNodeEditor();
+					}
+					ImGui::EndChild();
+					ImGui::EndTabItem();
+				}
+				if (ImGui::BeginTabItem("Canvas"))
+				{
+					
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
 			}
-			ImGui::EndChild();
+
+			
 		}
 		ImGui::End();
 

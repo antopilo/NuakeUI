@@ -2,6 +2,10 @@
 #include "NuakeRenderer/Math.h"
 #include <NuakeRenderer/NuakeRenderer.h>
 #include <NuakeRenderer/VertexBufferLayout.h>
+
+#include "Font.h"
+#include "FontManager.h"
+
 #include "FileSystem.h"
 
 namespace NuakeUI
@@ -11,11 +15,21 @@ namespace NuakeUI
 		Vector2 UV;
 	};
 
+	std::shared_ptr<Font> Renderer::mDefaultFont;
+
 	Renderer::Renderer()
 	{
+		// Rectangle Shader
 		std::string vertexSource = FileSystem::ReadFile("../resources/panel.vert.glsl");
 		std::string fragSource = FileSystem::ReadFile("../resources/panel.frag.glsl");
 		mShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
+
+		// SDF Shader
+		vertexSource = FileSystem::ReadFile("../resources/text.vert.glsl");
+		fragSource = FileSystem::ReadFile("../resources/text.frag.glsl");
+		mSDFShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
+
+		mDefaultFont = FontManager::Get().GetFont("../resources/fonts/SourceSansPro-Regular.ttf");
 
 		const std::vector<Vertex> vertices = {
 			{ {  1.f,  1.f, 0.f }, {1.f, 0.f} },
@@ -97,5 +111,53 @@ namespace NuakeUI
 		mVertexArray->Unbind();
 
 		mShader->Unbind();
+	}
+
+	void Renderer::DrawString(const std::string& string, float fontSize, std::shared_ptr<Font> font, Vector3 position)
+	{
+		fontSize /= 64.f;
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		mSDFShader->Bind();
+		mSDFShader->SetUniform("u_View", mView);
+
+		font->mAtlas->Bind(5);
+		mSDFShader->SetUniform("u_Atlas", 5);
+
+		float lineHeight = font->LineHeight;
+
+		float advance = 0.0f;
+		for (char const& c : string)
+		{
+			Char& letter = font->GetChar((int)c);
+			//advance += letter.Advance * fontSize;
+			Matrix4 model = Matrix4(1.f);
+			model = glm::translate(model, position);
+			model = glm::translate(model, Vector3(advance * fontSize, (-(letter.PlaneBounds.top) + (lineHeight)) * fontSize, 0.f));
+			float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
+			float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
+
+			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
+			model = glm::translate(model, Vector3(0, 0, 100));
+			mSDFShader->SetUniforms({
+				{ "u_Model", model},
+				{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
+				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
+				{ "u_BGColor",   Color(0.f, 0.f, 0.f, 0.f) },
+				{ "u_FontColor", Color(1.f, 1.f, 1.f, 1.f) },
+				{ "u_PxRange",   fontSize },
+			});
+
+			mVertexArray->Bind();
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			advance += (letter.Advance);
+		}
+	}
+
+	void Renderer::DrawChar(std::shared_ptr<Font> font, int letter)
+	{
+		
 	}
 }

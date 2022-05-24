@@ -6,7 +6,7 @@ FileSystem.h FileSystem.cpp
 Button.h Button.cpp 
 Checkbox.h Checkbox.cpp 
 InputManager.h Text.h Text.cpp 
-StyleSheet.h 
+StyleSheet.h Font.h Font.cpp
 )
 
-target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore msdf-gen-atlas)
+target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore msdf-atlas-gen)

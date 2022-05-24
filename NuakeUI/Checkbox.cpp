@@ -6,6 +6,7 @@ namespace NuakeUI
 	{
 		ID = id;
 		mNode = YGNodeNew();
+		mType = NodeType::Checkbox;
 
 		// Default Styling
 		Style.border = 8.f;

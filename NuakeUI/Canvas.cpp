@@ -56,6 +56,8 @@ namespace NuakeUI
 		y = InputManager->GetMouseY();
 
 		auto root = mRootNode->GetYogaNode();
+
+		mRootNode->Calculate();
 		if (root)
 			YGNodeCalculateLayout(root, size.x, size.y, YGDirectionLTR);
 	}

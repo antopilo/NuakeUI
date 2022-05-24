@@ -10,6 +10,10 @@ namespace NuakeUI
 	class Canvas
 	{
 	public:
+		static std::shared_ptr<Canvas> New() {
+			return std::make_shared<Canvas>();
+		}
+
 		Canvas();
 		~Canvas();
 

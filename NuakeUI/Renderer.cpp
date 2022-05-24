@@ -113,46 +113,49 @@ namespace NuakeUI
 		mShader->Unbind();
 	}
 
-	void Renderer::DrawString(const std::string& string, float fontSize, std::shared_ptr<Font> font, Vector3 position)
+	void Renderer::DrawString(const std::string& string, FontStyle style, std::shared_ptr<Font> font, Vector3 position)
 	{
-		fontSize /= 64.f;
-		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		mSDFShader->Bind();
-		mSDFShader->SetUniform("u_View", mView);
-
 		font->mAtlas->Bind(5);
-		mSDFShader->SetUniform("u_Atlas", 5);
 
-		float lineHeight = font->LineHeight;
-
+		const float fontSize = style.FontSize / 64.f;
 		float advance = 0.0f;
 		for (char const& c : string)
 		{
 			Char& letter = font->GetChar((int)c);
-			//advance += letter.Advance * fontSize;
+
+			// Move the cursor
 			Matrix4 model = Matrix4(1.f);
 			model = glm::translate(model, position);
-			model = glm::translate(model, Vector3(advance * fontSize, (-(letter.PlaneBounds.top) + (lineHeight)) * fontSize, 0.f));
+			model = glm::translate(model, Vector3(advance * fontSize, (-(letter.PlaneBounds.top) + (font->LineHeight)) * fontSize, 0.f));
+
+			advance += (letter.Advance);
+
+			// Scaling of the quad
 			float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
 			float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
-
 			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
 			model = glm::translate(model, Vector3(0, 0, 100));
+
+			// Set Uniforms
 			mSDFShader->SetUniforms({
-				{ "u_Model", model},
+				{ "u_View", mView },
+				{ "u_Model", model },
+				{ "u_Atlas", 5 },
 				{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
 				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
-				{ "u_BGColor",   Color(0.f, 0.f, 0.f, 0.f) },
-				{ "u_FontColor", Color(1.f, 1.f, 1.f, 1.f) },
+				{ "u_BGColor",   style.BackgroundColor },
+				{ "u_FontColor", style.FontColor },
 				{ "u_PxRange",   fontSize },
 			});
 
+			// Draw glyps
 			mVertexArray->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, 6);
-			advance += (letter.Advance);
 		}
 	}
 

@@ -52,7 +52,8 @@ namespace NuakeUI
 
 	void Node::Calculate()
 	{
-		IsMouseHover(0, 0);
+		for (auto& c : Childrens)
+			c->Calculate();
 	}
 
 	bool Node::IsMouseHover(float x, float y)

@@ -10,16 +10,36 @@
 
 namespace NuakeUI
 {
+	enum class LengthType
+	{
+		Percentage, Pixel, Relative
+	};
+
+	struct Length
+	{
+		float value = 1.f;
+		LengthType type = LengthType::Relative;
+	};
+
 	struct NodeStyle
 	{
 		Color background_color;
 		Color border_color;
 		float border = 0.f;
+		Length Width;
+		Length Height;
+		Length MinWidth;
+		Length MaxWidth;
 	};
 
 	enum class State
 	{
 		Idle, Hover, Pressed, Clicked
+	};
+
+	enum class NodeType
+	{
+		Node, Button, Checkbox, Text
 	};
 
 	class Node
@@ -29,6 +49,7 @@ namespace NuakeUI
 		YGNodeRef mNode; // Yoga_CPP nodes.
 		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
 
+		NodeType mType = NodeType::Node;
 		State mState = State::Idle;
 	public:
 		NodeStyle Style; // The current visual styles.
@@ -42,13 +63,15 @@ namespace NuakeUI
 		Node() = default;
 		~Node() = default;
 
+		inline NodeType GetType() const { return mType; }
+
 	public:
 		virtual void Draw(int z);
 		virtual void UpdateInput(InputManager* manager);
 		virtual void Tick();
 
 		// Calculates the layout.
-		void Calculate(); 
+		virtual void Calculate(); 
 
 		bool IsMouseHover(float x, float y);
 		State GetState() const { return mState; }

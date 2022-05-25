@@ -76,7 +76,6 @@ namespace NuakeUI
 
 	std::shared_ptr<Canvas> CanvasParser::Parse(const std::string& path)
 	{
-
 		tinyxml2::XMLDocument doc;
 		doc.LoadFile(path.c_str());
 
@@ -92,6 +91,7 @@ namespace NuakeUI
 			if (FileSystem::FileExists(relativePath));
 			{
 				auto styleSheet = StyleSheetParser::Get().Parse(relativePath);
+				canvas->SetStyleSheet(styleSheet);
 			}
 		}
 

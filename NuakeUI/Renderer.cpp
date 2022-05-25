@@ -102,9 +102,9 @@ namespace NuakeUI
 		mShader->SetUniform("u_Model", transform);
 		mShader->SetUniform("u_Size", {width, height});
 		mShader->SetUniform("u_View", mView);
-		mShader->SetUniform("u_Color", node->Style.background_color);
-		mShader->SetUniform("u_Border", node->Style.border);
-		mShader->SetUniform("u_BorderColor", node->Style.border_color);
+		mShader->SetUniform("u_Color", node->ComputedStyle.BackgroundColor);
+		mShader->SetUniform("u_Border", node->ComputedStyle.BorderSize);
+		mShader->SetUniform("u_BorderColor", node->ComputedStyle.BorderColor);
 
 		mVertexArray->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 6);

@@ -1,6 +1,7 @@
 #pragma once
 #include "Canvas.h"
 #include "Text.h"
+#include "StyleSheet.h"
 
 #include <memory>
 
@@ -65,10 +66,10 @@ namespace NuakeUI
 
 		auto type = mSelectedNode->GetType();
 
-		ImGui::ColorEdit4("Background Color", (float*) &mSelectedNode->Style.background_color);
+		ImGui::ColorEdit4("Background Color", (float*) &mSelectedNode->ComputedStyle.BackgroundColor);
 		ImGui::Separator();
-		ImGui::DragFloat("Border Size", &mSelectedNode->Style.border, 1.f, 0.f);
-		ImGui::ColorEdit4("Border Color", (float*)&mSelectedNode->Style.border_color);
+		ImGui::DragFloat("Border Size", &mSelectedNode->ComputedStyle.BorderSize, 1.f, 0.f);
+		ImGui::ColorEdit4("Border Color", (float*)&mSelectedNode->ComputedStyle.BorderColor);
 
 		if (type == NodeType::Text)
 		{
@@ -110,15 +111,84 @@ namespace NuakeUI
 					ImGui::EndChild();
 					ImGui::EndTabItem();
 				}
-				if (ImGui::BeginTabItem("Canvas"))
+				if (ImGui::BeginTabItem("StyleSheet"))
 				{
-					
+					auto styleSheet = canvas->GetStyleSheet();
+
+					for (auto& r : styleSheet->Rules)
+					{
+						std::string imguiText = "";
+						for(int s = 0; s < r.Selector.size(); s++)
+						{ 
+							std::string selectorText = "";
+
+							auto& selector = r.Selector[s];
+							auto type = selector.Type;
+							if (type == StyleSelectorType::Id)
+								selectorText += "#";
+							else if (type == StyleSelectorType::Class)
+								selectorText += ".";
+
+							selectorText += selector.Value.c_str();
+
+							if(s < r.Selector.size() - 1)
+								selectorText += ", ";
+
+							imguiText += selectorText;
+						}
+
+						imguiText += " { ";
+						ImGui::Text(imguiText.c_str());
+
+						ImGui::Indent(8.f);
+
+						// Now the properties!
+						for (auto& rule : r.Properties)
+						{
+							// Name
+							
+							StyleProperties type = rule.first;
+							if (type == StyleProperties::Width) ImGui::Text("Width: ");
+							else if (type == StyleProperties::Height) ImGui::Text("Height: ");
+							else if (type == StyleProperties::MinWidth) ImGui::Text("min-width: ");
+							else if (type == StyleProperties::MinHeight) ImGui::Text("min-height: ");
+							else if (type == StyleProperties::MaxWidth) ImGui::Text("max-width: ");
+							else if (type == StyleProperties::MaxHeight) ImGui::Text("max-height: ");
+
+							ImGui::SameLine();
+
+							std::string valueText = "";
+							// value
+							PropValue value = rule.second;
+							if (value.type == PropValueType::Percent)
+							{
+								valueText += std::to_string(value.value.Number);
+								valueText += "%;";
+							}
+							else if (value.type == PropValueType::Pixel)
+							{
+								valueText += std::to_string(value.value.Number);
+								valueText += "px;";
+							}
+							else if (value.type == PropValueType::Color)
+							{
+
+							}
+							else if (value.type == PropValueType::Auto)
+							{
+								valueText += "auto;";
+							}
+
+							ImGui::Text(valueText.c_str());
+						}
+						ImGui::Indent(-8.f);
+						ImGui::Text("}");
+					}
+
 					ImGui::EndTabItem();
 				}
 				ImGui::EndTabBar();
 			}
-
-			
 		}
 		ImGui::End();
 

@@ -9,9 +9,9 @@ namespace NuakeUI
 		mType = NodeType::Checkbox;
 
 		// Default Styling
-		Style.border = 8.f;
+		ComputedStyle.BorderSize = 8.f;
 		SetWidthPixel(20.f); SetHeightPixel(20.f);
-		Style.border_color = { 0.1f, 0.1f, 0.1f, 1.0f };
+		ComputedStyle.BorderColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 	}
 
 	std::shared_ptr<Checkbox> Checkbox::New(const std::string& name)

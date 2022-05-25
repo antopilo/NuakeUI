@@ -21,6 +21,7 @@ namespace NuakeUI
 
 	void Canvas::SetRootNode(std::shared_ptr<Node> root)
 	{
+
 		mRootNode = root;
 	}
 
@@ -47,6 +48,65 @@ namespace NuakeUI
 		}
 	}
 
+	void Canvas::StyleNode(std::shared_ptr<Node> node)
+	{
+		for (auto& rule : mStyleSheet->Rules)
+		{
+			bool respectSelector = true;
+			for (auto& selector : rule.Selector)
+			{
+				bool foundSelector = false;
+				if (selector.Type == StyleSelectorType::Class)
+				{
+					for (auto& c : node->Classes)
+					{
+						if (c == selector.Value)
+							foundSelector = true;
+					}
+				}
+				else if (selector.Type == StyleSelectorType::Id)
+				{
+					if (node->GetID() == selector.Value)
+						foundSelector = true;
+				}
+				else if (selector.Type == StyleSelectorType::Class)
+				{
+					if (selector.Value == "text" &&
+						node->GetType() == NodeType::Text)
+					{
+						foundSelector = true;
+					}
+					else if (selector.Value == "div" &&
+						node->GetType() == NodeType::Node)
+					{
+						foundSelector = true;
+					}
+					else if (selector.Value == "button" &&
+						node->GetType() == NodeType::Button)
+					{
+						foundSelector = true;
+					}
+					else if (selector.Value == "checkbox" &&
+						node->GetType() == NodeType::Checkbox)
+					{
+						foundSelector = true;
+					}
+				}
+
+				if (!foundSelector)
+					respectSelector = false;
+			}
+
+			if (respectSelector)
+				node->ApplyStyleProperties(rule.Properties);
+		}
+
+		for (auto& c : node->GetChildrens())
+		{
+			StyleNode(c);
+		}
+	}
+
 	void Canvas::Calculate(Vector2 size)
 	{
 		Renderer::Get().SetViewportSize(size);
@@ -54,6 +114,10 @@ namespace NuakeUI
 		float x, y;
 		x = InputManager->GetMouseX();
 		y = InputManager->GetMouseY();
+
+		// ReStyle the node tree.
+		if (Dirty)
+			StyleNode(mRootNode);
 
 		auto root = mRootNode->GetYogaNode();
 

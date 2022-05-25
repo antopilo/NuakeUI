@@ -65,8 +65,8 @@ namespace NuakeUI
 		float width   = YGNodeLayoutGetWidth(ygNode);
 		float height  = YGNodeLayoutGetHeight(ygNode);
 		float padding = YGNodeLayoutGetPadding(ygNode, YGEdgeLeft);
-		float left    = YGNodeLayoutGetLeft(ygNode); //+ offset.x;
-		float top = YGNodeLayoutGetTop(ygNode);// +offset.y;
+		float left    = YGNodeLayoutGetLeft(ygNode);
+		float top = YGNodeLayoutGetTop(ygNode);
 
 		float parentLeft = 0.0f;
 		float parentTop = 0.0f;
@@ -84,10 +84,36 @@ namespace NuakeUI
 
 	void Node::InsertChild(std::shared_ptr<Node> child)
 	{
+		
 		Childrens.push_back(child);
 		YGNodeInsertChild(this->mNode, child->GetYogaNode(), Childrens.size() - 1);
 	}
 
+	void Node::ApplyStyleProperties(std::map<StyleProperties, PropValue> properties)
+	{
+		for (auto& p : properties)
+		{
+			StyleProperties prop = p.first;
+			PropValue value = p.second;
+
+			switch (prop)
+			{
+			LengthProp(Width)
+			LengthProp(Height)
+			LengthProp(MinHeight)
+			LengthProp(MinWidth)
+			LengthProp(MaxHeight)
+			LengthProp(MaxWidth)
+			}
+		}
+
+		SetLength(Width)
+		SetLength(Height)
+		SetLengthNoAuto(MinWidth)
+		SetLengthNoAuto(MinHeight)
+		SetLengthNoAuto(MaxWidth)
+		SetLengthNoAuto(MaxHeight)
+	}
 
 	std::vector<std::shared_ptr<Node>> Node::GetChildrens() const
 	{

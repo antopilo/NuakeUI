@@ -70,7 +70,7 @@ namespace NuakeUI
 		}
 
 		// Draw each line and offset the Y of the position by the line height.
-		for(int i = 1; i < Lines.size(); i++)
+		for(int i = 0; i < Lines.size(); i++)
 		{
 			// Draw the first line
 			Renderer::Get().DrawString(Lines[i], FontStyle, mFont, position);

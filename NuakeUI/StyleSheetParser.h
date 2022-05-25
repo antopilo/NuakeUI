@@ -26,6 +26,6 @@ namespace NuakeUI
 
 	private:
 		void ParseImportRule(KatanaRule* rule);
-		void ParseStyleRule(KatanaRule* rule);
+		void ParseStyleRule(KatanaRule* rule, std::shared_ptr<StyleSheet> stylesheet);
 	};
 }

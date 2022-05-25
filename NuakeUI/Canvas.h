@@ -39,11 +39,7 @@ namespace NuakeUI
 		template<class T>
 		std::shared_ptr<T> FindNodeByID(const std::string& id)
 		{
-			assert(root != nullptr); // No Root has been set.
-
-			auto result = root->FindChildByID<T>(id);
-			assert(result != nullptr);
-
+			std::shared_ptr<T> result = this->mRootNode->FindChildByID<T>(id);
 			return result;
 		}
 

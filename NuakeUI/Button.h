@@ -10,6 +10,7 @@ namespace NuakeUI
 	{
 	private:
 		bool mHasBeenClicked = false;
+		bool mHasCallback = false;
 	public:
 		std::string Label = "";
 
@@ -26,6 +27,7 @@ namespace NuakeUI
 
 		void SetClickCallback(void(*callback)())
 		{
+			mHasCallback = true;
 			ClickCallback = callback;
 		}
 	};

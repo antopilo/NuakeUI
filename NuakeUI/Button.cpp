@@ -33,7 +33,7 @@ namespace NuakeUI
 				if (mState == State::Pressed && !isMouseDown)
 				{
 					// Calling the click callback.
-					if (ClickCallback)
+					if (mHasCallback)
 						ClickCallback();
 				}
 				mState = State::Hover;

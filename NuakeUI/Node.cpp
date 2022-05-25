@@ -84,7 +84,6 @@ namespace NuakeUI
 
 	void Node::InsertChild(std::shared_ptr<Node> child)
 	{
-		
 		Childrens.push_back(child);
 		YGNodeInsertChild(this->mNode, child->GetYogaNode(), Childrens.size() - 1);
 	}
@@ -104,6 +103,12 @@ namespace NuakeUI
 			LengthProp(MinWidth)
 			LengthProp(MaxHeight)
 			LengthProp(MaxWidth)
+
+			case StyleProperties::BackgroundColor:
+			{
+				ComputedStyle.BackgroundColor = value.value.Color / 255.f;
+			}
+			break;
 			}
 		}
 

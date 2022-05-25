@@ -70,6 +70,7 @@ namespace NuakeUI
 		else if (prop == "margin-right")	return StyleProperties::MarginRight;
 		else if (prop == "margin-top")		return StyleProperties::MarginTop;
 		else if (prop == "margin-bottom")	return StyleProperties::MarginBottom;
+		else if (prop == "background-color")	return StyleProperties::BackgroundColor;
 	}
 
 	void StyleSheetParser::ParseStyleRule(KatanaRule* rule, std::shared_ptr<StyleSheet> styleSheet)
@@ -141,12 +142,31 @@ namespace NuakeUI
 						propValue.type = PropValueType::Percent;
 					}
 					break;
-				case KatanaValueUnit::KATANA_VALUE_UNKNOWN:
+				case KatanaValueUnit::KATANA_VALUE_PARSER_HEXCOLOR:
+				{
+					int r, g, b, a = 255;
+					sscanf(value->string, "%02x%02x%02x%02x", &r, &g, &b, &a);
+					propValue.value.Color = Color(r, g, b, a);
+					propValue.type = PropValueType::Color;
+				}
+				break;
+				case KatanaValueUnit::KATANA_VALUE_RGBCOLOR:
+				{
+					if (value->unit == KATANA_VALUE_RGBCOLOR)
 					{
-						// other
-						
+						printf(value->raw);
 					}
-					break;
+					
+					//propValue.value.Color = value->raw;
+					propValue.type = PropValueType::Color;
+				}
+				break;
+				case KatanaValueUnit::KATANA_VALUE_UNKNOWN:
+				{
+					// other
+					std::string valueStr = value->string;
+				}
+				break;
 				}
 			}
 

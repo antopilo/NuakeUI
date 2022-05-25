@@ -17,7 +17,8 @@ namespace NuakeUI
 		Position, AlignItems, SelfAlign,
 		AspectRatio, FlexDirection, FlexWrap, FlexBasis, FlexGrow, FlexShrink,
 		JustifyContent, AlignContent, LayoutDirection, 
-		BorderSize, BorderRadius, BorderColor
+		BorderSize, BorderRadius, BorderColor,
+		BackgroundColor
 	};
 	enum class PositionType { Relative, Absolute };
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };

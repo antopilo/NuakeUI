@@ -26,22 +26,22 @@ namespace NuakeUI
 			bool isMouseDown = inputManager->IsMouseInputDown();
 			if (isMouseDown)
 			{
-				mState = State::Pressed;
+				State = NodeState::Pressed;
 			}
 			else
 			{
-				if (mState == State::Pressed && !isMouseDown)
+				if (State == NodeState::Pressed && !isMouseDown)
 				{
 					// Calling the click callback.
 					if (mHasCallback)
-						ClickCallback();
+						ClickCallback(*this);
 				}
-				mState = State::Hover;
+				State = NodeState::Hover;
 			}
 		}
 		else
 		{
-			mState = State::Idle;
+			State = NodeState::Idle;
 		}
 
 		for (auto& c : Childrens)

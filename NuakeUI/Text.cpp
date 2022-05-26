@@ -10,34 +10,42 @@ namespace NuakeUI
 		return std::make_shared<Text>(id, text);
 	}
 
-	Text::Text(const std::string& id, const std::string& text) : Value(text)
+	Text::Text(const std::string& id, const std::string& text)
 	{
 		ID = id;
 		mNode = YGNodeNew();
 		mType = NodeType::Text;
 
+		mFont = Renderer::Get().mDefaultFont;
+
+		SetText(text);
+
+		YGNodeStyleSetMinHeight(mNode, ((mFont->LineHeight) / 32.f) * ComputedStyle.FontSize * Lines.size());
+		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
+		YGNodeStyleSetWidthPercent(mNode, 100.f);
+	}
+
+	void Text::SetText(const std::string& text)
+	{
+		Lines.clear();
+
 		// Split into lines
 		auto ss = std::stringstream{ text };
 		for (std::string line; std::getline(ss, line, '\n');)
 			Lines.push_back(line);
-
-		mFont = Renderer::Get().mDefaultFont;
-
-		YGNodeStyleSetMinHeight(mNode, ((mFont->LineHeight) / 32.f) * FontStyle.FontSize * Lines.size());
-		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
-		YGNodeStyleSetWidthPercent(mNode, 100.f);
 	}
 
 	void Text::Draw(int z)
 	{
 		const float width = YGNodeLayoutGetWidth(mNode);
 		const float height = YGNodeLayoutGetHeight(mNode);
+		ComputedSize = { width, height };
 
 		float left = YGNodeLayoutGetLeft(mNode); 
 		float top = YGNodeLayoutGetTop(mNode);
 
 		// Centers the text in the line height.
-		top += (mFont->LineHeight / 64.0) * (FontStyle.FontSize) / 2.0f;
+		top += (mFont->LineHeight / 64.0) * (ComputedStyle.FontSize) / 2.0f;
 
 		const float paddingLeft = YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
 		const float paddingTop = YGNodeLayoutGetPadding(mNode, YGEdgeTop);
@@ -57,51 +65,70 @@ namespace NuakeUI
 		const float leftPosition = left + parentLeft;
 		const float topPosition = top + parentTop;
 		Vector3 position = Vector3(leftPosition, topPosition, z);
+		ComputedPosition = position;
 
-		if (FontStyle.Alignment == TextAlign::Center)
+		if (ComputedStyle.TextAlign == TextAlignType::Center)
 		{
 			// We center the text horizontally.
 			position.x += (width / 2.0f) - CalculateWidth() / 2.0f;
 		}
-		else if (FontStyle.Alignment == TextAlign::Right)
+		else if (ComputedStyle.TextAlign == TextAlignType::Right)
 		{
 			// Aligns the line of the left
 			position.x += width - CalculateWidth(); 
 		}
 
+		if (!Parent->ComputedStyle.Overflow)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(Parent->ComputedPosition.x, (1080 - Parent->ComputedPosition.y - Parent->ComputedSize.y), Parent->ComputedSize.x, Parent->ComputedSize.y);
+		}
+		
+
 		// Draw each line and offset the Y of the position by the line height.
 		for(int i = 0; i < Lines.size(); i++)
 		{
 			// Draw the first line
-			Renderer::Get().DrawString(Lines[i], FontStyle, mFont, position);
+			Renderer::Get().DrawString(Lines[i], ComputedStyle, mFont, position);
 			// Update the Y position to the next line.
-			position.y += (mFont->LineHeight / 32.0f) * (FontStyle.FontSize);
+			position.y += (mFont->LineHeight / 32.0f) * (ComputedStyle.FontSize);
 		}
+
+		if (!Parent->ComputedStyle.Overflow)
+			glDisable(GL_SCISSOR_TEST);
 	}
 
 	float Text::CalculateWidth()
 	{
 		// If theres no text, then assume it's 0;
-		if (Value == "") return 0.f;
+		if (Lines.size() == 0) return 0.f;
 
-		const float fontSize = FontStyle.FontSize / 64.f;
-		float textWidth = 0.f;
-
-		// Iterate over each character and add up the advance.
-		for (char const& c : Value)
+		const float fontSize = ComputedStyle.FontSize / 64.f;
+		
+		// Find the largest line.
+		float maxWidth = 0.f;
+		for (auto& l : Lines)
 		{
-			Char& letter = mFont->GetChar((int)c);
-			textWidth += (letter.Advance);
+			float textWidth = 0.f;
+			// Iterate over each character and add up the advance.
+			for (char const& c : l)
+			{
+				Char& letter = mFont->GetChar((int)c);
+				textWidth += (letter.Advance);
+			}
+
+			if (textWidth > maxWidth)
+				maxWidth = textWidth;
 		}
 
 		// Scale the width by the font size.
-		return textWidth * fontSize;
+		return maxWidth * fontSize;
 	}
 
 	void Text::Calculate()
 	{
 		const float halfLineHeight = mFont->LineHeight / 32.f;
-		const float linesHeight = Lines.size() * FontStyle.FontSize;
+		const float linesHeight = Lines.size() * ComputedStyle.FontSize;
 		YGNodeStyleSetMinHeight(mNode, halfLineHeight * linesHeight);
 		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
 	}

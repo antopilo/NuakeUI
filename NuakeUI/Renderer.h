@@ -26,7 +26,7 @@ namespace NuakeUI
 
 		void BeginDraw();
 		void DrawNode(std::shared_ptr<Node> node, int z);
-		void DrawString(const std::string& string, FontStyle style, std::shared_ptr<Font> font = mDefaultFont, Vector3 position = Vector3());
+		void DrawString(const std::string& string, NodeStyle& nodeStyle, std::shared_ptr<Font> font = mDefaultFont, Vector3 position = Vector3());
 		void DrawChar(std::shared_ptr<Font> font, int letter);
 		void DrawRect();
 

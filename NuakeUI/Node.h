@@ -4,11 +4,13 @@
 #include <NuakeRenderer/Math.h>
 #include <yoga/yoga.h>
 
+#include "NodeState.h"
+
 #include <map>
 #include <vector>
 #include <string>
 #include "StyleSheet.h"
-
+#include <any>
 
 #define SetLength(name) \
 if (ComputedStyle.##name.type == LengthType::Auto)  \
@@ -16,11 +18,30 @@ YGNodeStyleSet##name##Auto(mNode); \
 else if (ComputedStyle.##name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.##name.value); \
 else if (ComputedStyle.##name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.##name.value); \
 
+#define SetLengthBorder(name, border) \
+if (ComputedStyle.##name##border.type == LengthType::Auto)  \
+YGNodeStyleSet##name##Auto(mNode, YGEdge##border); \
+else if (ComputedStyle.##name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.##name##border.value); \
+else if (ComputedStyle.##name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.##name##border.value); \
+
+#define SetLengthBorderNoAuto(name, border) \
+if (ComputedStyle.##name##border.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, YGEdge##border, ComputedStyle.##name##border.value); \
+else if (ComputedStyle.##name##border.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode,  YGEdge##border, ComputedStyle.##name##border.value); \
+
+
 #define SetLengthNoAuto(name) \
 if (ComputedStyle.##name.type == LengthType::Pixel) YGNodeStyleSet##name(mNode, ComputedStyle.##name.value); \
 else if (ComputedStyle.##name.type == LengthType::Percentage) YGNodeStyleSet##name##Percent(mNode, ComputedStyle.##name.value); \
 
+#define EnumProp(name) EnumPropEx(name, ##name##Type)
 
+#define EnumPropEx(name, enums) \
+case StyleProperties::name: \
+{ \
+auto type = value.value.Enum; \
+ComputedStyle.##name## = (##enums##)type; \
+} \
+break;\
 
 #define LengthProp(name)  \
 				case StyleProperties::name: \
@@ -72,18 +93,18 @@ namespace NuakeUI
 		Length Height;
 		Length MinHeight;
 		Length MaxHeight;
-		Length PaddingLeft;
-		Length PaddingTop;
-		Length PaddingRight;
-		Length PaddingBottom;
-		Length MarginLeft;
-		Length MarginTop;
-		Length MarginRight;
-		Length MarginBottom;
-		PositionType Position;
+		Length PaddingLeft		= { 0.f, LengthType::Pixel };
+		Length PaddingTop		= { 0.f, LengthType::Pixel };
+		Length PaddingRight		= { 0.f, LengthType::Pixel };
+		Length PaddingBottom	= { 0.f, LengthType::Pixel };
+		Length MarginLeft		= { 0.f, LengthType::Pixel };
+		Length MarginTop		= { 0.f, LengthType::Pixel };
+		Length MarginRight		= { 0.f, LengthType::Pixel };
+		Length MarginBottom		= { 0.f, LengthType::Pixel };
+		PositionType Position	= PositionType::Relative;
 		AlignItemsType SelfAlign;
 		AlignItemsType AlignItems;
-		float Ratio;
+		float AspectRatio;
 		FlexDirectionType FlexDirection;
 		FlexWrapType FlexWrap;
 		float FlexBasis;
@@ -95,11 +116,10 @@ namespace NuakeUI
 		float BorderSize = 0.f;
 		float BorderRadius;
 		Color BorderColor = Color(0, 0, 0, 0);
-	};
-
-	enum class State
-	{
-		Idle, Hover, Pressed, Clicked
+		float FontSize = 64.0f;
+		TextAlignType TextAlign = TextAlignType::Left;
+		Color FontColor = Color(1, 1, 1, 1);
+		bool Overflow = true;
 	};
 
 	enum class NodeType
@@ -113,10 +133,15 @@ namespace NuakeUI
 		std::string ID = ""; // Name of the node in the tree
 		YGNodeRef mNode; // Yoga_CPP nodes.
 		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
-
 		NodeType mType = NodeType::Node;
-		State mState = State::Idle;
+		
+
 	public:
+		Vector2 ComputedSize;
+		Vector2 ComputedPosition;
+		Node* Parent = nullptr;
+
+		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
 		
 		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
@@ -130,6 +155,8 @@ namespace NuakeUI
 
 		inline NodeType GetType() const { return mType; }
 	public:
+		std::any UserData;
+
 		virtual void Draw(int z);
 		virtual void UpdateInput(InputManager* manager);
 		virtual void Tick();
@@ -140,7 +167,6 @@ namespace NuakeUI
 		virtual void Calculate();
 
 		bool IsMouseHover(float x, float y);
-		State GetState() const { return mState; }
 
 		YGNodeRef GetYogaNode() const { return mNode; }
 		std::string GetID() const { return ID; }

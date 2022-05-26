@@ -71,6 +71,8 @@ namespace NuakeUI
 		const float width = YGNodeLayoutGetWidth(yogaNode);
 		const float height = YGNodeLayoutGetHeight(yogaNode);
 		const float padding = YGNodeLayoutGetPadding(yogaNode, YGEdgeLeft);
+		const float margin = YGNodeLayoutGetMargin(yogaNode, YGEdgeLeft);
+		const float marginTop = YGNodeLayoutGetMargin(yogaNode, YGEdgeTop);
 		const float left = YGNodeLayoutGetLeft(yogaNode);
 		const float top = YGNodeLayoutGetTop(yogaNode);
 		const float borderLeft = YGNodeLayoutGetBorder(yogaNode, YGEdgeLeft);
@@ -94,26 +96,38 @@ namespace NuakeUI
 			parent = YGNodeGetParent(parent);
 		}
 
+		node->ComputedSize = Vector2(width, height);
+		node->ComputedPosition = Vector2(left + parentLeft, top);
+
 		transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, z));
 		transform = glm::scale(transform, Vector3(width, height, 1.0f));
 
 		mShader->Bind();
-		
-		mShader->SetUniform("u_Model", transform);
-		mShader->SetUniform("u_Size", {width, height});
-		mShader->SetUniform("u_View", mView);
-		mShader->SetUniform("u_Color", node->ComputedStyle.BackgroundColor);
-		mShader->SetUniform("u_Border", node->ComputedStyle.BorderSize);
-		mShader->SetUniform("u_BorderColor", node->ComputedStyle.BorderColor);
+		mShader->SetUniforms({
+			{ "u_Model",		transform },
+			{ "u_Size",			Vector2(width, height) },
+			{ "u_View",			mView },
+			{ "u_Color",		node->ComputedStyle.BackgroundColor },
+			{ "u_Border",		node->ComputedStyle.BorderSize },
+			{ "u_BorderRadius",		node->ComputedStyle.BorderRadius },
+			{ "u_BorderColor",	node->ComputedStyle.BorderColor },
+		});
+
+		if (node->Parent != nullptr && !node->Parent->ComputedStyle.Overflow)
+		{
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(node->Parent->ComputedPosition.x, (1080 - node->Parent->ComputedPosition.y - node->Parent->ComputedSize.y), node->Parent->ComputedSize.x, node->Parent->ComputedSize.y);
+		}
 
 		mVertexArray->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		mVertexArray->Unbind();
-
+		glDrawArrays(GL_TRIANGLES, 0, 6);		mVertexArray->Unbind();
 		mShader->Unbind();
+		if (node->Parent && node->Parent &&node->Parent->ComputedStyle.Overflow)
+			glDisable(GL_SCISSOR_TEST);
+
 	}
 
-	void Renderer::DrawString(const std::string& string, FontStyle style, std::shared_ptr<Font> font, Vector3 position)
+	void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::shared_ptr<Font> font, Vector3 position)
 	{
 		glDisable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -122,7 +136,7 @@ namespace NuakeUI
 		mSDFShader->Bind();
 		font->mAtlas->Bind(5);
 
-		const float fontSize = style.FontSize / 64.f;
+		const float fontSize = nodeStyle.FontSize / 64.f;
 		float advance = 0.0f;
 		for (char const& c : string)
 		{
@@ -148,19 +162,13 @@ namespace NuakeUI
 				{ "u_Atlas", (int)5 },
 				{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
 				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
-				{ "u_BGColor",   style.BackgroundColor },
-				{ "u_FontColor", style.FontColor },
+				{ "u_FontColor", nodeStyle.FontColor },
 				{ "u_PxRange",   fontSize },
 			});
 
-			// Draw glyps
+			// Draw glyp
 			mVertexArray->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
-	}
-
-	void Renderer::DrawChar(std::shared_ptr<Font> font, int letter)
-	{
-		
 	}
 }

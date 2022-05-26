@@ -4,6 +4,8 @@
 
 #include "Renderer.h"
 
+#include "Node.h"
+
 namespace NuakeUI
 {
 	Canvas::Canvas()
@@ -21,7 +23,6 @@ namespace NuakeUI
 
 	void Canvas::SetRootNode(std::shared_ptr<Node> root)
 	{
-
 		mRootNode = root;
 	}
 
@@ -53,7 +54,8 @@ namespace NuakeUI
 		for (auto& rule : mStyleSheet->Rules)
 		{
 			bool respectSelector = true;
-			for (auto& selector : rule.Selector)
+
+			for (StyleSelector& selector : rule.Selector)
 			{
 				bool foundSelector = false;
 				if (selector.Type == StyleSelectorType::Class)
@@ -63,6 +65,13 @@ namespace NuakeUI
 						if (c == selector.Value)
 							foundSelector = true;
 					}
+				}
+				else if (selector.Type == StyleSelectorType::Pseudo)
+				{
+					if (selector.Value == "hover" && node->State == NodeState::Hover)
+						foundSelector = true;
+					if (selector.Value == "active" && node->State == NodeState::Pressed)
+						foundSelector = true;
 				}
 				else if (selector.Type == StyleSelectorType::Id)
 				{

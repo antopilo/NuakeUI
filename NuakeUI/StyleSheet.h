@@ -1,6 +1,7 @@
 #pragma once
-
 #include <NuakeRenderer/Math.h>
+
+#include "NodeState.h"
 
 #include <memory>
 #include <string>
@@ -9,42 +10,28 @@
 
 namespace NuakeUI
 {
+	enum class NodeState;
 	enum class StyleProperties {
-		Width, Height, MinWidth, 
-		MinHeight, MaxWidth, MaxHeight,
+		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		PaddingLeft, PaddingTop, PaddingRight, PaddingBottom,
 		MarginLeft, MarginTop, MarginRight, MarginBottom, 
 		Position, AlignItems, SelfAlign,
 		AspectRatio, FlexDirection, FlexWrap, FlexBasis, FlexGrow, FlexShrink,
 		JustifyContent, AlignContent, LayoutDirection, 
 		BorderSize, BorderRadius, BorderColor,
-		BackgroundColor
+		BackgroundColor, TextAlign, Color, Overflow
 	};
 	enum class PositionType { Relative, Absolute };
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };
-	enum class FlexWrapType
-	{
-		NoWrap, Wrap, WrapReversed
-	};
+	enum class FlexWrapType { NoWrap, Wrap, WrapReversed };
+	enum class JustifyContentType { FlexStart, FlexEnd, Center, SpaceBetween, SpaceAround, SpaceEvenly };
+	enum class FlexDirectionType { Row, Column, RowReversed, ColumnReversed };
+	enum class AlignContentType { FlexStart, FlexEnd, Stretch, Center, SpaceBetween, SpaceAround };
+	enum class LayoutDirectionType { LTR = 2, RTL = 3 };
 
-	enum class JustifyContentType
+	enum class TextAlignType
 	{
-		FlexStart, FlexEnd, Center, SpaceBetween, SpaceArouand, SpaceEvenly
-	};
-
-	enum class FlexDirectionType
-	{
-		Row, Column, RowReversed, ColumnReversed
-	};
-
-	enum class AlignContentType
-	{
-		FLEX_START, FLEX_END, STRETCH, CENTER, SPACE_BETWEEN, SPACE_AROUND
-	};
-
-	enum class LayoutDirectionType
-	{
-		LTR = 2, RTL = 3
+		Left, Center, Right
 	};
 
 	// Style Values
@@ -64,7 +51,7 @@ namespace NuakeUI
 	};
 
 	// Selector
-	enum class StyleSelectorType { Id, Class, Tag };
+	enum class StyleSelectorType { Id, Class, Tag, Pseudo };
 
 	struct StyleSelector
 	{

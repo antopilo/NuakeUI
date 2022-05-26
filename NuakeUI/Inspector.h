@@ -74,9 +74,9 @@ namespace NuakeUI
 		if (type == NodeType::Text)
 		{
 			auto text = std::reinterpret_pointer_cast<Text>(mSelectedNode);
-			ImGui::DragFloat("Font Size", &text->FontStyle.FontSize, 1.f, 0.f);
-			ImGui::ColorEdit4("Font Color", (float*)&text->FontStyle.FontColor);
-			ImGui::ColorEdit4("Font Background Color", (float*)&text->FontStyle.BackgroundColor);
+			ImGui::DragFloat("Font Size", &text->ComputedStyle.FontSize, 1.f, 0.f);
+			ImGui::ColorEdit4("Font Color", (float*)&text->ComputedStyle.FontColor);
+			ImGui::ColorEdit4("Font Background Color", (float*)&text->ComputedStyle.BackgroundColor);
 		}
 	}
 
@@ -113,78 +113,92 @@ namespace NuakeUI
 				}
 				if (ImGui::BeginTabItem("StyleSheet"))
 				{
-					auto styleSheet = canvas->GetStyleSheet();
-
-					for (auto& r : styleSheet->Rules)
+					if (ImGui::BeginChild("StyleSheetEditor", ImGui::GetContentRegionAvail()))
 					{
-						std::string imguiText = "";
-						for(int s = 0; s < r.Selector.size(); s++)
-						{ 
-							std::string selectorText = "";
+						auto styleSheet = canvas->GetStyleSheet();
 
-							auto& selector = r.Selector[s];
-							auto type = selector.Type;
-							if (type == StyleSelectorType::Id)
-								selectorText += "#";
-							else if (type == StyleSelectorType::Class)
-								selectorText += ".";
-
-							selectorText += selector.Value.c_str();
-
-							if(s < r.Selector.size() - 1)
-								selectorText += ", ";
-
-							imguiText += selectorText;
-						}
-
-						imguiText += " { ";
-						ImGui::Text(imguiText.c_str());
-
-						ImGui::Indent(8.f);
-
-						// Now the properties!
-						for (auto& rule : r.Properties)
+						int ri = 0;
+						for (auto& r : styleSheet->Rules)
 						{
-							// Name
-							
-							StyleProperties type = rule.first;
-							if (type == StyleProperties::Width) ImGui::Text("Width: ");
-							else if (type == StyleProperties::Height) ImGui::Text("Height: ");
-							else if (type == StyleProperties::MinWidth) ImGui::Text("min-width: ");
-							else if (type == StyleProperties::MinHeight) ImGui::Text("min-height: ");
-							else if (type == StyleProperties::MaxWidth) ImGui::Text("max-width: ");
-							else if (type == StyleProperties::MaxHeight) ImGui::Text("max-height: ");
+							std::string imguiText = "";
+							for (int s = 0; s < r.Selector.size(); s++)
+							{
+								std::string selectorText = "";
 
-							ImGui::SameLine();
+								auto& selector = r.Selector[s];
+								auto type = selector.Type;
+								if (type == StyleSelectorType::Id)
+									selectorText += "#";
+								else if (type == StyleSelectorType::Class)
+									selectorText += ".";
 
-							std::string valueText = "";
-							// value
-							PropValue value = rule.second;
-							if (value.type == PropValueType::Percent)
-							{
-								valueText += std::to_string(value.value.Number);
-								valueText += "%;";
-							}
-							else if (value.type == PropValueType::Pixel)
-							{
-								valueText += std::to_string(value.value.Number);
-								valueText += "px;";
-							}
-							else if (value.type == PropValueType::Color)
-							{
+								selectorText += selector.Value.c_str();
 
-							}
-							else if (value.type == PropValueType::Auto)
-							{
-								valueText += "auto;";
+								if (s < r.Selector.size() - 1)
+									selectorText += ", ";
+
+								imguiText += selectorText;
 							}
 
-							ImGui::Text(valueText.c_str());
+							imguiText += " { ";
+							ImGui::Text(imguiText.c_str());
+
+							ImGui::Indent(8.f);
+
+							// Now the properties!
+							int i = 0;
+							for (auto& rule : r.Properties)
+							{
+								// Name
+								std::string propName = "UnknownProperty";
+
+								StyleProperties type = rule.first;
+								if (type == StyleProperties::Width)					propName = "width: ";
+								else if (type == StyleProperties::Height)			propName = "weight: ";
+								else if (type == StyleProperties::MinWidth)			propName = "min-width: ";
+								else if (type == StyleProperties::MinHeight)		propName = "min-height: ";
+								else if (type == StyleProperties::MaxWidth)			propName = "max-width: ";
+								else if (type == StyleProperties::MaxHeight)		propName = "max-height: ";
+								else if (type == StyleProperties::BackgroundColor)	propName = "BackgroundColor: ";
+
+								ImGui::Text(propName.c_str());
+								ImGui::SameLine();
+
+								std::string valueText = "";
+
+								// value
+								PropValue& value = rule.second;
+								if (value.type == PropValueType::Percent)
+								{
+									valueText += std::to_string(value.value.Number);
+									valueText += "\%;";
+								}
+								else if (value.type == PropValueType::Pixel)
+								{
+									valueText += std::to_string(value.value.Number);
+									valueText += "px;";
+								}
+								else if (value.type == PropValueType::Color)
+								{
+									Color colorFloat = rule.second.value.Color / 255.f;
+									ImGui::ColorEdit4(("##colorEdit" + std::to_string(ri) + propName + std::to_string(i)).c_str(), &colorFloat.r);
+									rule.second.value.Color = colorFloat * 255.f;
+								}
+								else if (value.type == PropValueType::Auto)
+								{
+									valueText += "auto;";
+								}
+								i++;
+								ImGui::Text(valueText.c_str());
+							}
+							ImGui::Indent(-8.f);
+							ImGui::Text("}");
+							ri++;
 						}
-						ImGui::Indent(-8.f);
-						ImGui::Text("}");
-					}
 
+						canvas->Dirty = true;
+					}
+					ImGui::EndChild();
 					ImGui::EndTabItem();
 				}
 				ImGui::EndTabBar();

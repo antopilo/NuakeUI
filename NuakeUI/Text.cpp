@@ -19,8 +19,8 @@ namespace NuakeUI
 		mFont = Renderer::Get().mDefaultFont;
 
 		SetText(text);
-
-		YGNodeStyleSetMinHeight(mNode, ((mFont->LineHeight) / 32.f) * ComputedStyle.FontSize * Lines.size());
+		float height = ((mFont->LineHeight) / 32.f) * ComputedStyle.FontSize * Lines.size();
+		YGNodeStyleSetHeight(mNode, height);
 		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
 		YGNodeStyleSetWidthPercent(mNode, 100.f);
 	}
@@ -54,13 +54,13 @@ namespace NuakeUI
 
 		float parentLeft = 0.0f;
 		float parentTop = 0.0f;
-		auto parent = YGNodeGetParent(mNode);
-		while (parent)
-		{
-			parentLeft += YGNodeLayoutGetLeft(parent);
-			parentTop += YGNodeLayoutGetTop(parent);
-			parent = YGNodeGetParent(parent);
-		}
+		auto parent = Parent;
+		//while (parent)
+		//{
+		parentLeft += parent->ComputedPosition.x;
+		parentTop += parent->ComputedPosition.y;
+			//parent = parent->Parent;
+		//}
 
 		const float leftPosition = left + parentLeft;
 		const float topPosition = top + parentTop;
@@ -78,12 +78,13 @@ namespace NuakeUI
 			position.x += width - CalculateWidth(); 
 		}
 
-		if (!Parent->ComputedStyle.Overflow)
+		// Scissor the parent bounding box.
+		bool hideOverflow = Parent != nullptr && Parent->ComputedStyle.Overflow == OverflowType::Hidden;
+		if (hideOverflow)
 		{
 			glEnable(GL_SCISSOR_TEST);
 			glScissor(Parent->ComputedPosition.x, (1080 - Parent->ComputedPosition.y - Parent->ComputedSize.y), Parent->ComputedSize.x, Parent->ComputedSize.y);
 		}
-		
 
 		// Draw each line and offset the Y of the position by the line height.
 		for(int i = 0; i < Lines.size(); i++)
@@ -94,7 +95,8 @@ namespace NuakeUI
 			position.y += (mFont->LineHeight / 32.0f) * (ComputedStyle.FontSize);
 		}
 
-		if (!Parent->ComputedStyle.Overflow)
+		// Disable scissoring.
+		if (hideOverflow)
 			glDisable(GL_SCISSOR_TEST);
 	}
 
@@ -129,7 +131,7 @@ namespace NuakeUI
 	{
 		const float halfLineHeight = mFont->LineHeight / 32.f;
 		const float linesHeight = Lines.size() * ComputedStyle.FontSize;
-		YGNodeStyleSetMinHeight(mNode, halfLineHeight * linesHeight);
-		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
+		YGNodeStyleSetHeight(mNode, halfLineHeight * linesHeight);
+		YGNodeStyleSetWidth(mNode, CalculateWidth());
 	}
 }

@@ -19,7 +19,7 @@ namespace NuakeUI
 		AspectRatio, FlexDirection, FlexWrap, FlexBasis, FlexGrow, FlexShrink,
 		JustifyContent, AlignContent, LayoutDirection, 
 		BorderSize, BorderRadius, BorderColor,
-		BackgroundColor, TextAlign, Color, Overflow
+		BackgroundColor, TextAlign, Color, Overflow, FontSize, Visibility
 	};
 	enum class PositionType { Relative, Absolute };
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };
@@ -33,6 +33,9 @@ namespace NuakeUI
 	{
 		Left, Center, Right
 	};
+
+	enum class OverflowType { Show, Hidden, Scroll };
+	enum class VisibilityType {Show, Hidden};
 
 	// Style Values
 	enum class PropValueType { Pixel , Percent, Auto, Color, Enum };

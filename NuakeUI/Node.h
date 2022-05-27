@@ -119,7 +119,8 @@ namespace NuakeUI
 		float FontSize = 64.0f;
 		TextAlignType TextAlign = TextAlignType::Left;
 		Color FontColor = Color(1, 1, 1, 1);
-		bool Overflow = true;
+		OverflowType Overflow = OverflowType::Show;
+		VisibilityType Visibility = VisibilityType::Show;
 	};
 
 	enum class NodeType
@@ -135,16 +136,43 @@ namespace NuakeUI
 		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
 		NodeType mType = NodeType::Node;
 		
-
 	public:
-		Vector2 ComputedSize;
-		Vector2 ComputedPosition;
+		float ScrollDelta = 0.0f;
+		float MaxScrollDelta = 0.0f;
+
+		Vector2 ComputedSize = {0, 0};
+		Vector2 ComputedPosition = {0, 0};
 		Node* Parent = nullptr;
 
 		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
 		
 		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
+		void AddClass(const std::string& c) { Classes.push_back(c); }
+		void RemoveClass(const std::string& c)
+		{
+			bool found = false;
+			int i = 0;
+			for (auto& cc : Classes)
+			{
+				if (cc == c)
+				{
+					found = true;
+					break;
+				}
+				i++;
+			}
+
+			if(found)
+				Classes.erase(Classes.begin() + i);
+		}
+		bool HasClass(const std::string& c) const
+		{
+			bool found = false;
+			for (auto& cc : Classes)
+				if (cc == c) found = true;
+			return found;
+		}
 
 		// Should be used to creates nodes since it creates a shared_ptr for you.
 		static std::shared_ptr<Node> New(const std::string id);

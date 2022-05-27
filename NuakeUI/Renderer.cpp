@@ -67,6 +67,10 @@ namespace NuakeUI
 	{
 		Matrix4 transform = Matrix4(1.f);
 
+		float parentScroll = 0.f;
+		if (node->Parent)
+			parentScroll = node->Parent->ScrollDelta;
+
 		const YGNodeRef yogaNode = node->GetYogaNode();
 		const float width = YGNodeLayoutGetWidth(yogaNode);
 		const float height = YGNodeLayoutGetHeight(yogaNode);
@@ -74,30 +78,22 @@ namespace NuakeUI
 		const float margin = YGNodeLayoutGetMargin(yogaNode, YGEdgeLeft);
 		const float marginTop = YGNodeLayoutGetMargin(yogaNode, YGEdgeTop);
 		const float left = YGNodeLayoutGetLeft(yogaNode);
-		const float top = YGNodeLayoutGetTop(yogaNode);
+		const float top = YGNodeLayoutGetTop(yogaNode) - parentScroll;
 		const float borderLeft = YGNodeLayoutGetBorder(yogaNode, YGEdgeLeft);
 
 		float parentLeft = 0.f;
 		float parentTop = 0.f;
-		float parentHeight = 0.f;
-		float parentWidth = 0.f;
 
-		auto parent = YGNodeGetParent(yogaNode);
-		if (parent)
-		{
-			parentHeight = YGNodeLayoutGetHeight(parent);
-			parentWidth = YGNodeLayoutGetWidth(parent);
-		}
-
+		auto parent = node->Parent;
 		while (parent)
 		{
-			parentLeft += YGNodeLayoutGetLeft(parent);
-			parentTop += YGNodeLayoutGetTop(parent);
-			parent = YGNodeGetParent(parent);
+			parentLeft += parent->ComputedPosition.x;
+			parentTop += parent->ComputedPosition.y;
+			parent = parent->Parent;
 		}
 
 		node->ComputedSize = Vector2(width, height);
-		node->ComputedPosition = Vector2(left + parentLeft, top);
+		node->ComputedPosition = Vector2(left + parentLeft, top + parentTop);
 
 		transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, z));
 		transform = glm::scale(transform, Vector3(width, height, 1.0f));
@@ -113,7 +109,8 @@ namespace NuakeUI
 			{ "u_BorderColor",	node->ComputedStyle.BorderColor },
 		});
 
-		if (node->Parent != nullptr && !node->Parent->ComputedStyle.Overflow)
+		bool hideOverflow = node->Parent != nullptr && node->Parent->ComputedStyle.Overflow == OverflowType::Hidden;
+		if (hideOverflow)
 		{
 			glEnable(GL_SCISSOR_TEST);
 			glScissor(node->Parent->ComputedPosition.x, (1080 - node->Parent->ComputedPosition.y - node->Parent->ComputedSize.y), node->Parent->ComputedSize.x, node->Parent->ComputedSize.y);
@@ -122,7 +119,8 @@ namespace NuakeUI
 		mVertexArray->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 6);		mVertexArray->Unbind();
 		mShader->Unbind();
-		if (node->Parent && node->Parent &&node->Parent->ComputedStyle.Overflow)
+
+		if (hideOverflow)
 			glDisable(GL_SCISSOR_TEST);
 
 	}

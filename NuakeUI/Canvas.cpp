@@ -37,6 +37,9 @@ namespace NuakeUI
 
 		mRootNode->UpdateInput(InputManager);
 		mRootNode->Tick();
+
+		InputManager->ScrollX = 0.f;
+		InputManager->ScrollY = 0.f;
 	}
 
 	void Canvas::Draw()
@@ -78,7 +81,7 @@ namespace NuakeUI
 					if (node->GetID() == selector.Value)
 						foundSelector = true;
 				}
-				else if (selector.Type == StyleSelectorType::Class)
+				else if (selector.Type == StyleSelectorType::Tag)
 				{
 					if (selector.Value == "text" &&
 						node->GetType() == NodeType::Text)
@@ -124,13 +127,18 @@ namespace NuakeUI
 		x = InputManager->GetMouseX();
 		y = InputManager->GetMouseY();
 
+		
+
+		auto root = mRootNode->GetYogaNode();
+
+
 		// ReStyle the node tree.
 		if (Dirty)
 			StyleNode(mRootNode);
 
-		auto root = mRootNode->GetYogaNode();
 
 		mRootNode->Calculate();
+		
 		if (root)
 			YGNodeCalculateLayout(root, size.x, size.y, YGDirectionLTR);
 	}

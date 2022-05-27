@@ -38,8 +38,56 @@ namespace NuakeUI
 		else
 			State = NodeState::Hover;
 
-		if (isHover && inputManager->IsMouseInputDown())
+		if (isHover && inputManager->IsMouseInputDown() )
 			State = NodeState::Clicked;
+
+
+		// Calculate Max Scroll delta
+		float totalHeight = 0.0f;
+		for (auto& c : Childrens)
+		{
+			float childrenBottom = c->ComputedPosition.y + ScrollDelta + c->ComputedSize.y;
+			if (childrenBottom > totalHeight)
+				totalHeight = childrenBottom;
+		}
+		
+		if (totalHeight > ComputedSize.y)
+			MaxScrollDelta = -(ComputedSize.y - totalHeight);
+		else
+			MaxScrollDelta = 0.f;
+
+		// Scroll the parent and keep the remainder.
+		float scroll = inputManager->GetScrollY();
+		if (std::abs(scroll) > 0.f && ComputedStyle.Overflow == OverflowType::Scroll && isHover)
+		{
+			const float scrollForce = 20.f;
+			const float scrollAmount = scroll * -scrollForce;
+			float newDelta = ScrollDelta + scrollAmount;
+			if (scrollAmount > .0f)// && )
+			{
+				float remainder = 0.0f;
+				if (ScrollDelta < MaxScrollDelta && newDelta >= MaxScrollDelta)
+				{
+					remainder = newDelta + MaxScrollDelta;
+					inputManager->ScrollY += scroll;
+					ScrollDelta = MaxScrollDelta;
+				}
+				else if (newDelta <= MaxScrollDelta)
+				{
+					ScrollDelta = newDelta;
+					inputManager->ScrollY += scroll;
+				}
+				
+			}
+			else if(scrollAmount < .0f && newDelta >= .0f)
+			{
+				ScrollDelta = newDelta;
+				inputManager->ScrollY -= scroll;
+			}
+		}
+
+		if (ScrollDelta > MaxScrollDelta)
+			ScrollDelta = MaxScrollDelta;
 
 		for (auto& c : Childrens)
 			c->UpdateInput(inputManager);
@@ -48,8 +96,14 @@ namespace NuakeUI
 	void Node::Draw(int z)
 	{
 		z += 1;
+		if (ComputedStyle.Visibility == VisibilityType::Hidden)
+			return;
+
 		for (auto& c : Childrens)
 		{
+			if (c->ComputedStyle.Visibility == VisibilityType::Hidden)
+				continue;
+
 			Renderer::Get().DrawNode(c, z);
 			c->Draw(z );
 		}
@@ -64,18 +118,25 @@ namespace NuakeUI
 	bool Node::IsMouseHover(float x, float y)
 	{
 		YGNodeRef ygNode = GetYogaNode();
+
+		float parentScroll = 0.f;
+		if (Parent)
+			parentScroll = Parent->ScrollDelta;
+
 		float width   = YGNodeLayoutGetWidth(ygNode);
 		float height  = YGNodeLayoutGetHeight(ygNode);
 		float padding = YGNodeLayoutGetPadding(ygNode, YGEdgeLeft);
 		float left    = YGNodeLayoutGetLeft(ygNode);
-		float top = YGNodeLayoutGetTop(ygNode);
+		float top = YGNodeLayoutGetTop(ygNode) - parentScroll;
 
 		float parentLeft = 0.0f;
 		float parentTop = 0.0f;
-		for (YGNodeRef parent = YGNodeGetParent(ygNode); parent; parent = YGNodeGetParent(parent))
+
+		auto parent = Parent;
+		if (parent)
 		{
-			parentLeft += YGNodeLayoutGetLeft(parent);
-			parentTop += YGNodeLayoutGetTop(parent);
+			parentLeft = parent->ComputedPosition.x;
+			parentTop = parent->ComputedPosition.y;
 		}
 
 		left += parentLeft;
@@ -135,7 +196,7 @@ namespace NuakeUI
 				EnumProp(AlignContent)
 				EnumProp(LayoutDirection)
 				case StyleProperties::BorderSize:
-					ComputedStyle.BorderSize = value.value.Number;
+					ComputedStyle.BorderSize = std::clamp(value.value.Number, 0.f, ComputedSize.x - ComputedStyle.BorderRadius);
 					break;
 				case StyleProperties::BorderRadius:
 					ComputedStyle.BorderRadius = value.value.Number;
@@ -153,7 +214,13 @@ namespace NuakeUI
 					ComputedStyle.TextAlign = (TextAlignType)(value.value.Enum);
 					break;
 				case StyleProperties::Overflow:
-					ComputedStyle.Overflow = (bool)value.value.Enum;
+					ComputedStyle.Overflow = (OverflowType)value.value.Enum;
+					break;
+				case StyleProperties::FontSize:
+					ComputedStyle.FontSize = value.value.Number;
+					break;
+				case StyleProperties::Visibility:
+					ComputedStyle.Visibility = (VisibilityType)value.value.Enum;
 					break;
 			}
 		}
@@ -177,7 +244,6 @@ namespace NuakeUI
 			YGNodeStyleSetPositionType(mNode, YGPositionTypeRelative);
 		else if (ComputedStyle.Position == PositionType::Absolute)
 			YGNodeStyleSetPositionType(mNode, YGPositionTypeAbsolute);
-
 		if (ComputedStyle.FlexDirection == FlexDirectionType::Column)
 			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionColumn);
 		else if (ComputedStyle.FlexDirection == FlexDirectionType::ColumnReversed)

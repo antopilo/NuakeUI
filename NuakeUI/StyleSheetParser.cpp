@@ -94,6 +94,8 @@ namespace NuakeUI
 		else if (prop == "text-align")			return StyleProperties::TextAlign;
 		else if (prop == "color")				return StyleProperties::Color;
 		else if (prop == "overflow")			return StyleProperties::Overflow;
+		else if (prop == "font-size")			return StyleProperties::FontSize;
+		else if (prop == "visibility")			return StyleProperties::Visibility;
 	}
 
 	void StyleSheetParser::ParseStyleRule(KatanaRule* rule, std::shared_ptr<StyleSheet> styleSheet)
@@ -267,10 +269,21 @@ namespace NuakeUI
 							}
 							else if (propType == StyleProperties::Overflow)
 							{
-								auto overflow = true;
-								if (valueStr == "hidden") overflow = false;
-								propValue.type == PropValueType::Enum;
+								OverflowType overflow = OverflowType::Show;
+								if (valueStr == "hidden") overflow = OverflowType::Hidden;
+								else if (valueStr == "show") overflow = OverflowType::Show;
+								else if (valueStr == "scroll") overflow = OverflowType::Scroll;
+
+								propValue.type = PropValueType::Enum;
 								propValue.value.Enum = (int)overflow;
+							}
+							else if (propType == StyleProperties::Visibility)
+							{
+								VisibilityType visibility = VisibilityType::Show;
+								if (valueStr == "hidden") visibility = VisibilityType::Hidden;
+
+								propValue.type = PropValueType::Enum;
+								propValue.value.Enum = (int)visibility;
 							}
 						}
 						break;

@@ -1,5 +1,5 @@
 #include "Button.h"
-
+#include "Text.h"
 
 namespace NuakeUI
 {
@@ -14,6 +14,7 @@ namespace NuakeUI
 		mType = NodeType::Button;
 		ID = name;
 		mNode = YGNodeNew();
+		InsertChild(Text::New(ID + "lbl", Label));
 	}
 
 	void Button::UpdateInput(InputManager* inputManager)

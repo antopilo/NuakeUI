@@ -19,15 +19,7 @@ namespace NuakeUI
 
 	Renderer::Renderer()
 	{
-		// Rectangle Shader
-		std::string vertexSource = FileSystem::ReadFile("../resources/panel.vert.glsl");
-		std::string fragSource = FileSystem::ReadFile("../resources/panel.frag.glsl");
-		mShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
-
-		// SDF Shader
-		vertexSource = FileSystem::ReadFile("../resources/text.vert.glsl");
-		fragSource = FileSystem::ReadFile("../resources/text.frag.glsl");
-		mSDFShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
+		ReloadShaders();
 
 		mDefaultFont = FontManager::Get().GetFont("../resources/fonts/SourceSansPro-Regular.ttf");
 
@@ -50,6 +42,19 @@ namespace NuakeUI
 
 		mVertexArray->AddBuffer(*mVertexBuffer, vbl);
 		mVertexArray->Unbind();
+	}
+
+	void Renderer::ReloadShaders()
+	{
+		// Rectangle Shader
+		std::string vertexSource = FileSystem::ReadFile("../resources/panel.vert.glsl");
+		std::string fragSource = FileSystem::ReadFile("../resources/panel.frag.glsl");
+		mShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
+
+		// SDF Shader
+		vertexSource = FileSystem::ReadFile("../resources/text.vert.glsl");
+		fragSource = FileSystem::ReadFile("../resources/text.frag.glsl");
+		mSDFShader = std::make_shared<NuakeRenderer::Shader>(vertexSource, fragSource);
 	}
 
 	void Renderer::SetViewportSize(const Vector2& size)

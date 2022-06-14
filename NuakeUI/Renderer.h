@@ -30,7 +30,7 @@ namespace NuakeUI
 		void DrawChar(std::shared_ptr<Font> font, int letter);
 		void DrawRect();
 
-
+		void ReloadShaders();
 		static std::shared_ptr<Font> mDefaultFont;
 	private:
 		Vector2 mSize;

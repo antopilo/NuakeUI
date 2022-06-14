@@ -40,13 +40,16 @@ namespace NuakeUI
 		std::variant<int*, float*, bool*, std::string*, char*> GetData();
 	};
 
+	class DataModel;
+	typedef std::shared_ptr<DataModel> DataModelPtr;
+	
 	class DataModel
 	{
 	public:
 		std::vector<DataBindObject> DataObjects;
 		std::string Name;
 
-		static std::shared_ptr<DataModel> New(const std::string& name)
+		static DataModelPtr New(const std::string& name)
 		{
 			return std::make_shared<DataModel>(name);
 		}
@@ -99,7 +102,14 @@ namespace NuakeUI
 			}
 		}
 
-		bool& GetDatab(const std::string& dataName)
+		template<typename T>
+		T& GetData(const std::string& dataName)
+		{
+			assert(false && "Unsupported data type");
+		}
+
+		template<>
+		bool& GetData(const std::string& dataName)
 		{
 			assert(HasData(dataName) && "Model has no data with that name.");
 			
@@ -110,11 +120,10 @@ namespace NuakeUI
 					return *std::get<bool*>(dataBindObject.GetData());
 				}
 			}
-
-			assert(false && "Data not found");
 		}
 
-		int& GetDatai(const std::string& dataName)
+		template<>
+		int& GetData(const std::string& dataName)
 		{
 			assert(HasData(dataName) && "Model has no data with that name.");
 
@@ -123,12 +132,42 @@ namespace NuakeUI
 				if (dataBindObject.Name == dataName)
 				{
 					auto variant = dataBindObject.GetData();
-					int* data = std::get<0>(variant);
+					int* data = std::get<int*>(variant);
 					return *data;
 				}
 			}
+		}
 
-			assert(false && "Data not found");
+		template<>
+		float& GetData(const std::string& dataName)
+		{
+			assert(HasData(dataName) && "Model has no data with that name.");
+
+			for (auto& dataBindObject : DataObjects)
+			{
+				if (dataBindObject.Name == dataName)
+				{
+					auto variant = dataBindObject.GetData();
+					float* data = std::get<float*>(variant);
+					return *data;
+				}
+			}
+		}
+
+		template<>
+		std::string& GetData(const std::string& dataName)
+		{
+			assert(HasData(dataName) && "Model has no data with that name.");
+
+			for (auto& dataBindObject : DataObjects)
+			{
+				if (dataBindObject.Name == dataName)
+				{
+					auto variant = dataBindObject.GetData();
+					std::string* data = std::get<std::string*>(variant);
+					return *data;
+				}
+			}
 		}
 	};
 }

@@ -29,5 +29,29 @@ namespace NuakeUI
 
 			return splittedString;
 		}
+
+		std::string RemoveChar(std::string string, const char character)
+		{
+			// remove space from string
+			string.erase(std::remove(string.begin(), string.end(), ' '), string.end());
+			return string;
+		}
+
+		std::vector<std::string> Split(std::string s, const std::string& delimiter)
+		{
+			auto splittedString = std::vector<std::string>();
+
+			std::vector<std::string> splits;
+			size_t pos = 0;
+			std::string token;
+			while ((pos = s.find(delimiter)) != std::string::npos) {
+				token = s.substr(0, pos);
+				splits.push_back(token);
+				s.erase(0, pos + delimiter.length());
+			}
+			splits.push_back(s);
+
+			return splits;
+		}
 	}
 }

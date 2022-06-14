@@ -130,14 +130,18 @@ namespace NuakeUI
 		Node, Button, Checkbox, Text
 	};
 
+	class Node;
+	typedef std::shared_ptr<Node> NodePtr;
+	
 	class Node
 	{
 	protected:
 		std::string ID = ""; // Name of the node in the tree
 		YGNodeRef mNode; // Yoga_CPP nodes.
-		std::vector<std::shared_ptr<Node>> Childrens = std::vector<std::shared_ptr<Node>>();
+		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
 		NodeType mType = NodeType::Node;
-		
+
+		DataModelPtr mDataModel;
 	public:
 		float ScrollDelta = 0.0f;
 		float MaxScrollDelta = 0.0f;
@@ -149,7 +153,6 @@ namespace NuakeUI
 		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
 		
-		std::shared_ptr<DataModel> Model;
 		std::shared_ptr<DataModelOperation> ModelIf;
 
 		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
@@ -180,7 +183,7 @@ namespace NuakeUI
 		}
 
 		// Should be used to creates nodes since it creates a shared_ptr for you.
-		static std::shared_ptr<Node> New(const std::string id);
+		static NodePtr New(const std::string id);
 
 		Node(const std::string& id); // Do not use.
 		Node() = default;
@@ -203,11 +206,18 @@ namespace NuakeUI
 		YGNodeRef GetYogaNode() const { return mNode; }
 		std::string GetID() const { return ID; }
 
-		bool HasModel() const { return Model != nullptr; }
-		
+		bool HasDataModel() const { return mDataModel != nullptr; }
+		DataModelPtr GetDataModel() const { return mDataModel; }
+		void SetDataModel(DataModelPtr dataModel)
+		{
+			mDataModel = dataModel;
+		}
+
 		// Childrens
-		std::vector<std::shared_ptr<Node>> GetChildrens() const;
-		void InsertChild(std::shared_ptr<Node> child);
+		std::vector<NodePtr> GetChildrens() const;
+		void InsertChild(NodePtr child);
+
+
 
 		template<class T>
 		std::shared_ptr<T> GetChild(unsigned int index)
@@ -229,45 +239,51 @@ namespace NuakeUI
 			assert(false);  // Node not found.
 		}
 
+		uint32_t GetIndex() const
+		{
+			if (!Parent)
+				return -1;
+
+			int i = 0;
+			for (auto& c : Parent->GetChildrens())
+			{
+				if (c->mNode == mNode)
+					return i;
+
+				i++;
+			}
+
+			return 0;
+		}
+
 		template<class T>
-		std::shared_ptr<T> FindChildByID(const std::string& id)
+		bool FindChildByID(const std::string& id, std::shared_ptr<T>& node)
 		{
 			for (auto& c : Childrens)
 			{
 				if (c->ID == id)
-					return std::static_pointer_cast<T>(c);
+				{
+					node = std::static_pointer_cast<T>(c);
+					return true;
+				}
 
-				auto result = c->FindChildByID<T>(id);
-				if (result != nullptr)
-					return result;
+				if (c->FindChildByID<T>(id, node))
+					return true;
 			}
 
-			return nullptr;
+			return false;
 		}
 
 		std::shared_ptr<DataModel> GetModel()
 		{
 			// Travel updward to find model
-			if (Model != nullptr)
-				return Model;
+			if (HasDataModel())
+				return GetDataModel();
+
 			else if (Parent != nullptr)
 				return Parent->GetModel();
 			else
 				return nullptr;
 		}
-
-		void SetHeightPixel(float h)  const { YGNodeStyleSetHeight(mNode, h); }
-		void SetWidthPixel(float w)    const { YGNodeStyleSetWidth(mNode, w); }
-		void SetHeightPercent(float h) const { YGNodeStyleSetHeightPercent(mNode, h); }
-		void SetWidthPercent(float w)  const { YGNodeStyleSetWidthPercent(mNode, w); }
-		void SetMaxHeightPixel(float h) const { YGNodeStyleSetMaxHeight(mNode, h); }
-		void SetMaxHeightPercent(float h) const { YGNodeStyleSetMaxHeightPercent(mNode, h); }
-		void SetMaxWidthPixel(float h) const { YGNodeStyleSetMaxWidth(mNode, h); }
-		void SetMaxWidthPercent(float h) const { YGNodeStyleSetMaxWidthPercent(mNode, h); }
-		void SetDisplay(YGDisplay display) const { YGNodeStyleSetDisplay(mNode, display); }
-		void SetJustify(YGJustify justify) const { YGNodeStyleSetJustifyContent(mNode, justify); }
-		void SetAlignItem(YGAlign align) const { YGNodeStyleSetAlignItems(mNode, align); }
-		void SetBorder(float w)  { ComputedStyle.BorderSize = w; }
-		void SetBorderColor(Color c) { ComputedStyle.BorderColor = c; }
 	};
 }

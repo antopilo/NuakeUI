@@ -27,10 +27,10 @@ namespace NuakeUI
 		switch (dataType)
 		{
 			case DataBindType::Bool:
-				return object->GetDatab(Name);
+				return object->GetData<bool>(Name);
 			case DataBindType::Int:
 			{
-				int data = object->GetDatai(Name);
+				int data = object->GetData<int>(Name);
 				switch (CompType)
 				{
 				case ComparaisonType::Equal:

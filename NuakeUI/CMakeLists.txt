@@ -18,7 +18,9 @@ Vendors/katana-parser/parser.h Vendors/katana-parser/parser.c Vendors/katana-par
 Vendors/katana-parser/selector.c Vendors/katana-parser/tokenizer.h Vendors/katana-parser/tokenizer.c 
 StyleSheetParser.h StyleSheetParser.cpp 
 InputManager.h InputManager.cpp StringHelper.h NodeState.h 
-DataBindObject.h DataBindObject.cpp
+DataBindObject.h DataBindObject.cpp DataBindOperation.h 
+DataModelOperations.h DataModelOperations.cpp 
+NuakeUI.h
 )
 
 target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore msdf-atlas-gen)

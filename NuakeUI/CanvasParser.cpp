@@ -8,7 +8,7 @@
 #include "FileSystem.h"
 #include "StyleSheetParser.h"
 #include "StringHelper.h"
-
+#include <charconv>
 #include <msdfgen/include/tinyxml2.h>
 
 namespace NuakeUI
@@ -25,19 +25,8 @@ namespace NuakeUI
 			if (idAttribute)
 				id = idAttribute->Value();
 
-			std::shared_ptr<Node> newNode;
+			NodePtr newNode;
 
-			// Scan the class attribute
-			std::vector<std::string> classes;
-			auto classAttribute = current->FindAttribute("class");
-			if (classAttribute) // If the attribute is found.
-			{
-				std::string strClasses = classAttribute->Value();
-
-				// Split the classes with space.
-				classes = StringHelper::Split(strClasses, ' ');
-			}
-			
 			// Parse the type of the node.
 			std::string type = current->Value();
 			if (type == "div") // Regular node.
@@ -61,7 +50,89 @@ namespace NuakeUI
 			}
 
 			// Add the classes to the node.
-			newNode->Classes = classes;
+			auto classAttribute = current->FindAttribute("class");
+			if (classAttribute) // If the attribute is found.
+			{
+				std::string strClasses = classAttribute->Value();
+
+				// Split the classes with space.
+				newNode->Classes = StringHelper::Split(strClasses, ' ');
+			}
+			
+			if (auto modelIf = current->FindAttribute("if"); modelIf)
+			{
+				std::string ifCondition = modelIf->Value();
+				
+				// remove spaces from if condition
+				ifCondition = StringHelper::RemoveChar(ifCondition, ' ');
+				
+				ComparaisonType compType = ComparaisonType::Equal;
+				std::vector<std::string> splits;
+				if (ifCondition.find("==") != std::string::npos)
+				{
+					compType = ComparaisonType::Equal;
+					splits = StringHelper::Split(ifCondition, "==");
+				}
+				else if (ifCondition.find("!=") != std::string::npos)
+				{
+					compType = ComparaisonType::NotEqual;
+					splits = StringHelper::Split(ifCondition, "!=");
+				}
+				else if (ifCondition.find(">=") != std::string::npos)
+				{
+					compType = ComparaisonType::GreaterOrEqual;
+					splits = StringHelper::Split(ifCondition, ">=");
+				}
+				else if (ifCondition.find("<=") != std::string::npos)
+				{
+					compType = ComparaisonType::LessOrEqual;
+					splits = StringHelper::Split(ifCondition, "<=");
+				}
+				else if (ifCondition.find(">") != std::string::npos)
+				{
+					compType = ComparaisonType::Greater;
+					splits = StringHelper::Split(ifCondition, ">");
+				}
+				else if (ifCondition.find("<") != std::string::npos)
+				{
+					compType = ComparaisonType::Less;
+					splits = StringHelper::Split(ifCondition, "<");
+				}
+
+				std::string left = splits[0];
+				std::string right = splits[1];
+				
+				auto operation = DataModelOperation::New(left, OperationType::If, compType);
+
+				// Determine type of value
+				if (right.find("\'") != std::string::npos)
+				{
+					// Value is a string.
+					operation->RightS = right;
+				}
+				else if (right.find(".") != std::string::npos)
+				{
+					char* begin = right.data();
+					char* end = begin + right.size();
+					std::from_chars(begin, end, operation->RightF);
+				}
+				else if (right.find("true") != std::string::npos)
+				{
+					operation->RightB = true;
+				}
+				else if (right.find("false") != std::string::npos)
+				{ 
+					operation->RightB = false;
+				}
+				else // assume is int
+				{
+					char* begin = right.data();
+					char* end = begin + right.size();
+					std::from_chars(begin, end, operation->RightI);
+				}
+
+				newNode->ModelIf = operation;
+			}
 
 			// Insert in the tree
 			node->InsertChild(newNode);

@@ -10,7 +10,6 @@ namespace NuakeUI
 
 		// Default Styling
 		ComputedStyle.BorderSize = 8.f;
-		SetWidthPixel(20.f); SetHeightPixel(20.f);
 		ComputedStyle.BorderColor = { 0.1f, 0.1f, 0.1f, 1.0f };
 	}
 

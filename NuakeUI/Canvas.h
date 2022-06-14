@@ -8,11 +8,15 @@
 
 namespace NuakeUI
 {
+	class Canvas;
+	typedef std::shared_ptr<Canvas> CanvasPtr;
+	
 	class Canvas
 	{
 	public:
 		bool Dirty = false;
-		static std::shared_ptr<Canvas> New() {
+		static CanvasPtr New() 
+		{
 			return std::make_shared<Canvas>();
 		}
 
@@ -37,10 +41,12 @@ namespace NuakeUI
 		}
 
 		template<class T>
-		std::shared_ptr<T> FindNodeByID(const std::string& id)
+		bool FindNodeByID(const std::string& id, std::shared_ptr<T>& node)
 		{
-			std::shared_ptr<T> result = this->mRootNode->FindChildByID<T>(id);
-			return result;
+			if (!this->mRootNode->FindChildByID<T>(id, node))
+				return false;
+
+			return true;
 		}
 
 	private:

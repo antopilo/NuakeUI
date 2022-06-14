@@ -32,6 +32,7 @@ namespace NuakeUI
 		
 		int RightI;
 		bool RightB;
+		std::string RightS;
 		float RightF;
 		
 		DataModelOperation(const std::string& name, OperationType type, ComparaisonType compType);

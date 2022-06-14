@@ -5,7 +5,7 @@
 
 namespace NuakeUI
 {
-	std::shared_ptr<Node> Node::New(const std::string id)
+	NodePtr Node::New(const std::string id)
 	{
 		return std::make_shared<Node>(id);
 	}
@@ -14,7 +14,7 @@ namespace NuakeUI
 	{
 		assert(id != "");
 		mNode = YGNodeNew();
-		Childrens = std::vector<std::shared_ptr<Node>>();
+		Childrens = std::vector<NodePtr>();
 
 		YGNodeStyleSetWidthAuto(mNode);
 		YGNodeStyleSetWidthAuto(mNode);
@@ -163,7 +163,7 @@ namespace NuakeUI
 		return isHover;
 	}
 
-	void Node::InsertChild(std::shared_ptr<Node> child)
+	void Node::InsertChild(NodePtr child)
 	{
 		child->Parent = this;
 		Childrens.push_back(child);
@@ -300,7 +300,7 @@ namespace NuakeUI
 			YGNodeStyleSetAlignItems(mNode, YGAlignBaseline);
 	}
 
-	std::vector<std::shared_ptr<Node>> Node::GetChildrens() const
+	std::vector<NodePtr> Node::GetChildrens() const
 	{
 		return Childrens;
 	}

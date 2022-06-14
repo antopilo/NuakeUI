@@ -6,6 +6,8 @@
 
 namespace NuakeUI
 {
+	class Button;
+	typedef std::shared_ptr<Button> ButtonPtr;
 	class Button : public Node
 	{
 	private:
@@ -17,15 +19,15 @@ namespace NuakeUI
 		Button(const std::string& name, const std::string& label);
 		~Button() {};
 
-		static std::shared_ptr<Button> New(const std::string& name, const std::string& label);
+		static ButtonPtr New(const std::string& name, const std::string& label);
 
-		void (*ClickCallback)(NuakeUI::Button&);
+		std::function<void(Button&)> ClickCallback;
 
 		void Draw();
 		void Tick() override;
 		void UpdateInput(InputManager* inputManager) override;
 
-		void SetClickCallback(void(*callback)(NuakeUI::Button&))
+		void SetClickCallback(std::function<void(Button&)> callback)
 		{
 			mHasCallback = true;
 			ClickCallback = callback;

@@ -68,11 +68,15 @@ namespace NuakeUI
 		Matrix4 transform = Matrix4(1.f);
 
 		float parentScroll = 0.f;
+		float parentPaddingRight = 0.f;
 		if (node->Parent)
+		{
 			parentScroll = node->Parent->ScrollDelta;
+		}
+			
 
 		const YGNodeRef yogaNode = node->GetYogaNode();
-		const float width = YGNodeLayoutGetWidth(yogaNode);
+		const float width = YGNodeLayoutGetWidth(yogaNode) - parentPaddingRight;
 		const float height = YGNodeLayoutGetHeight(yogaNode);
 		const float padding = YGNodeLayoutGetPadding(yogaNode, YGEdgeLeft);
 		const float margin = YGNodeLayoutGetMargin(yogaNode, YGEdgeLeft);
@@ -85,11 +89,10 @@ namespace NuakeUI
 		float parentTop = 0.f;
 
 		auto parent = node->Parent;
-		while (parent)
+		if (parent)
 		{
-			parentLeft += parent->ComputedPosition.x;
-			parentTop += parent->ComputedPosition.y;
-			parent = parent->Parent;
+			parentLeft = parent->ComputedPosition.x;
+			parentTop = parent->ComputedPosition.y;
 		}
 
 		node->ComputedSize = Vector2(width, height);
@@ -117,7 +120,8 @@ namespace NuakeUI
 		}
 
 		mVertexArray->Bind();
-		glDrawArrays(GL_TRIANGLES, 0, 6);		mVertexArray->Unbind();
+		glDrawArrays(GL_TRIANGLES, 0, 6);		
+		mVertexArray->Unbind();
 		mShader->Unbind();
 
 		if (hideOverflow)
@@ -131,10 +135,19 @@ namespace NuakeUI
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		const float fontSize = nodeStyle.FontSize / 64.f;
+
 		mSDFShader->Bind();
 		font->mAtlas->Bind(5);
-
-		const float fontSize = nodeStyle.FontSize / 64.f;
+		mSDFShader->SetUniforms({
+			{ "u_View", mView},
+			{"u_Atlas", 5},
+			{"u_FontColor", nodeStyle.FontColor},
+			{ "u_PxRange",   fontSize },
+		});
+		
+		mVertexArray->Bind();
+		
 		float advance = 0.0f;
 		for (char const& c : string)
 		{
@@ -151,22 +164,17 @@ namespace NuakeUI
 			float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
 			float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
 			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
-			model = glm::translate(model, Vector3(0, 0, 100));
 
 			// Set Uniforms
 			mSDFShader->SetUniforms({
-				{ "u_View", mView },
 				{ "u_Model", model },
-				{ "u_Atlas", (int)5 },
 				{ "u_TexturePos",   Vector2(letter.AtlasBounds.Pos.x, letter.AtlasBounds.Pos.y) },
 				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
-				{ "u_FontColor", nodeStyle.FontColor },
-				{ "u_PxRange",   fontSize },
 			});
 
-			// Draw glyp
-			mVertexArray->Bind();
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
+
+		mVertexArray->Unbind();
 	}
 }

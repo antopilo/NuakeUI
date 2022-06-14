@@ -94,8 +94,8 @@ namespace NuakeUI
 				{
 					const float treeWidth = ImGui::GetWindowContentRegionWidth();
 					const float availHeight = ImGui::GetContentRegionAvail().y;
-					const ImVec2 size = ImVec2(treeWidth * 0.33f, availHeight);
-					const ImVec2 size2 = ImVec2(treeWidth * 0.66f, availHeight);
+					const ImVec2 size = ImVec2(treeWidth * 0.5f, availHeight);
+					const ImVec2 size2 = ImVec2(treeWidth * 0.5f, availHeight);
 					if (ImGui::BeginChild("Tree", size))
 					{
 						DrawUI(canvas->GetRootNode());

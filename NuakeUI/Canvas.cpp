@@ -11,7 +11,7 @@ namespace NuakeUI
 	Canvas::Canvas()
 	{
 		mYogaConfig = YGConfigNew();
-		mYogaConfig->useWebDefaults = true;
+		mYogaConfig->useWebDefaults = false;
 	}
 
 	Canvas::~Canvas()
@@ -127,15 +127,11 @@ namespace NuakeUI
 		x = InputManager->GetMouseX();
 		y = InputManager->GetMouseY();
 
-		
-
 		auto root = mRootNode->GetYogaNode();
-
 
 		// ReStyle the node tree.
 		if (Dirty)
 			StyleNode(mRootNode);
-
 
 		mRootNode->Calculate();
 		

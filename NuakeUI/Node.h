@@ -5,12 +5,14 @@
 #include <yoga/yoga.h>
 
 #include "NodeState.h"
+#include "DataBindObject.h"
 
 #include <map>
 #include <vector>
 #include <string>
 #include "StyleSheet.h"
 #include <any>
+#include <NuakeUI/DataModelOperations.h>
 
 #define SetLength(name) \
 if (ComputedStyle.##name.type == LengthType::Auto)  \
@@ -114,7 +116,7 @@ namespace NuakeUI
 		AlignContentType AlignContent;
 		LayoutDirectionType LayoutDirection;
 		float BorderSize = 0.f;
-		float BorderRadius;
+		float BorderRadius = 0.f;
 		Color BorderColor = Color(0, 0, 0, 0);
 		float FontSize = 64.0f;
 		TextAlignType TextAlign = TextAlignType::Left;
@@ -147,6 +149,9 @@ namespace NuakeUI
 		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
 		
+		std::shared_ptr<DataModel> Model;
+		std::shared_ptr<DataModelOperation> ModelIf;
+
 		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
 		void AddClass(const std::string& c) { Classes.push_back(c); }
 		void RemoveClass(const std::string& c)
@@ -191,7 +196,6 @@ namespace NuakeUI
 
 		void ApplyStyleProperties(std::map<StyleProperties, PropValue> properties);
 
-		// Calculates the layout.
 		virtual void Calculate();
 
 		bool IsMouseHover(float x, float y);
@@ -199,9 +203,10 @@ namespace NuakeUI
 		YGNodeRef GetYogaNode() const { return mNode; }
 		std::string GetID() const { return ID; }
 
+		bool HasModel() const { return Model != nullptr; }
+		
 		// Childrens
 		std::vector<std::shared_ptr<Node>> GetChildrens() const;
-
 		void InsertChild(std::shared_ptr<Node> child);
 
 		template<class T>
@@ -238,6 +243,17 @@ namespace NuakeUI
 			}
 
 			return nullptr;
+		}
+
+		std::shared_ptr<DataModel> GetModel()
+		{
+			// Travel updward to find model
+			if (Model != nullptr)
+				return Model;
+			else if (Parent != nullptr)
+				return Parent->GetModel();
+			else
+				return nullptr;
 		}
 
 		void SetHeightPixel(float h)  const { YGNodeStyleSetHeight(mNode, h); }

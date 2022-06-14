@@ -18,6 +18,7 @@ namespace NuakeUI
 
 		YGNodeStyleSetWidthAuto(mNode);
 		YGNodeStyleSetWidthAuto(mNode);
+		YGNodeStyleSetFlexDirection(mNode, YGFlexDirection::YGFlexDirectionColumn);
 	}
 
 	void Node::Tick()
@@ -60,7 +61,7 @@ namespace NuakeUI
 		float scroll = inputManager->GetScrollY();
 		if (std::abs(scroll) > 0.f && ComputedStyle.Overflow == OverflowType::Scroll && isHover)
 		{
-			const float scrollForce = 20.f;
+			const float scrollForce = 40.f;
 			const float scrollAmount = scroll * -scrollForce;
 			float newDelta = ScrollDelta + scrollAmount;
 			if (scrollAmount > .0f)// && )
@@ -77,12 +78,21 @@ namespace NuakeUI
 					ScrollDelta = newDelta;
 					inputManager->ScrollY += scroll;
 				}
-				
 			}
-			else if(scrollAmount < .0f && newDelta >= .0f)
+			else if(scrollAmount < .0f)
 			{
-				ScrollDelta = newDelta;
-				inputManager->ScrollY -= scroll;
+				float remainder = 0.f;
+				if(ScrollDelta > 0.f && newDelta <= 0.f)
+				{
+					remainder = newDelta + MaxScrollDelta;
+					inputManager->ScrollY += scroll;
+					ScrollDelta = 0.f;
+				}
+				else if (newDelta >= 0.f)
+				{
+					ScrollDelta = newDelta;
+					inputManager->ScrollY += scroll;
+				}
 			}
 		}
 
@@ -101,6 +111,14 @@ namespace NuakeUI
 
 		for (auto& c : Childrens)
 		{
+			if (c->ModelIf)
+			{
+				if (!c->ModelIf->Compare(c->GetModel()))
+				{
+					continue;
+				}
+			}
+
 			if (c->ComputedStyle.Visibility == VisibilityType::Hidden)
 				continue;
 

@@ -41,58 +41,55 @@ namespace NuakeUI
 		const float height = YGNodeLayoutGetHeight(mNode);
 		ComputedSize = { width, height };
 
-		float left = YGNodeLayoutGetLeft(mNode); 
-		float top = YGNodeLayoutGetTop(mNode);
+		float x = YGNodeLayoutGetLeft(mNode); 
+		float y = YGNodeLayoutGetTop(mNode);
 
 		// Centers the text in the line height.
-		top += (mFont->LineHeight / 64.0) * (ComputedStyle.FontSize) / 2.0f;
+		y += (mFont->LineHeight / 64.0) * (ComputedStyle.FontSize) / 2.0f;
 
-		const float paddingLeft = YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
-		const float paddingTop = YGNodeLayoutGetPadding(mNode, YGEdgeTop);
-		left += paddingLeft;
-		top += paddingTop;
+		x += YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
+		y += YGNodeLayoutGetPadding(mNode, YGEdgeTop);
 
-		float parentLeft = 0.0f;
-		float parentTop = 0.0f;
 		auto parent = Parent;
-		//while (parent)
-		//{
-		parentLeft += parent->ComputedPosition.x;
-		parentTop += parent->ComputedPosition.y;
-			//parent = parent->Parent;
-		//}
+		bool hasParent = parent != nullptr;
+		if (hasParent)
+		{
+			x += parent->ComputedPosition.x;
+			y += parent->ComputedPosition.y - parent->ScrollDelta;
+		}
 
-		const float leftPosition = left + parentLeft;
-		const float topPosition = top + parentTop;
-		Vector3 position = Vector3(leftPosition, topPosition, z);
+		Vector3 position = Vector3(x, y, z);
 		ComputedPosition = position;
 
 		if (ComputedStyle.TextAlign == TextAlignType::Center)
-		{
-			// We center the text horizontally.
+		{	// We center the text horizontally.
 			position.x += (width / 2.0f) - CalculateWidth() / 2.0f;
 		}
 		else if (ComputedStyle.TextAlign == TextAlignType::Right)
-		{
-			// Aligns the line of the left
+		{	// Aligns the line of the left
 			position.x += width - CalculateWidth(); 
 		}
 
 		// Scissor the parent bounding box.
-		bool hideOverflow = Parent != nullptr && Parent->ComputedStyle.Overflow == OverflowType::Hidden;
+		bool hideOverflow = hasParent && Parent->ComputedStyle.Overflow == OverflowType::Hidden;
 		if (hideOverflow)
 		{
 			glEnable(GL_SCISSOR_TEST);
-			glScissor(Parent->ComputedPosition.x, (1080 - Parent->ComputedPosition.y - Parent->ComputedSize.y), Parent->ComputedSize.x, Parent->ComputedSize.y);
+			float clipX = Parent->ComputedPosition.x;
+			float clipY = (1080 - Parent->ComputedPosition.y - Parent->ComputedSize.y);
+			float clipWidth = Parent->ComputedSize.x;
+			float clipHeight = Parent->ComputedSize.y;
+			glScissor(clipX, clipY, clipWidth, clipHeight);
 		}
 
+		const float lineYOffset = (mFont->LineHeight / 32.0f) * (ComputedStyle.FontSize);
 		// Draw each line and offset the Y of the position by the line height.
 		for(int i = 0; i < Lines.size(); i++)
 		{
 			// Draw the first line
 			Renderer::Get().DrawString(Lines[i], ComputedStyle, mFont, position);
 			// Update the Y position to the next line.
-			position.y += (mFont->LineHeight / 32.0f) * (ComputedStyle.FontSize);
+			position.y += lineYOffset;
 		}
 
 		// Disable scissoring.

@@ -77,7 +77,13 @@ namespace NuakeUI
 	std::shared_ptr<Canvas> CanvasParser::Parse(const std::string& path)
 	{
 		tinyxml2::XMLDocument doc;
-		doc.LoadFile(path.c_str());
+		if (tinyxml2::XMLError error = doc.LoadFile(path.c_str()))
+		{
+			std::cout << "Error loading UI file: " << path << "\n" <<
+				"Error code is: " << error << std::endl;
+
+			return nullptr;
+		}
 
 		auto canvas = Canvas::New();
 		auto root = Node::New("root");

@@ -8,7 +8,12 @@
 
 namespace NuakeUI
 {
-	Canvas::Canvas()
+	CanvasPtr Canvas::New()
+	{
+		return std::make_shared<Canvas>();
+	}
+	
+	Canvas::Canvas() : mInputManager(nullptr)
 	{
 		mYogaConfig = YGConfigNew();
 		mYogaConfig->useWebDefaults = false;
@@ -18,41 +23,57 @@ namespace NuakeUI
 	{
 		YGConfigFree(mYogaConfig);
 		if (mRootNode)
+		{
 			YGNodeFreeRecursive(mRootNode->GetYogaNode());
-	}
-
-	void Canvas::SetRootNode(std::shared_ptr<Node> root)
-	{
-		mRootNode = root;
-	}
-
-	std::shared_ptr<Node> Canvas::GetRootNode() const
-	{
-		return mRootNode;
+		}
 	}
 
 	void Canvas::Tick()
 	{
-		assert(mRootNode); // The canvas doesn't have any root set.
-
-		mRootNode->UpdateInput(InputManager);
+		if (!mRootNode)
+			return;
+		
+		mRootNode->UpdateInput(mInputManager);
 		mRootNode->Tick();
 
-		InputManager->ScrollX = 0.f;
-		InputManager->ScrollY = 0.f;
+		mInputManager->ScrollX = 0.f;
+		mInputManager->ScrollY = 0.f;
 	}
 
 	void Canvas::Draw()
 	{
-		if (mRootNode)
-		{
-			Renderer::Get().BeginDraw();
-			Renderer::Get().DrawNode(mRootNode, 0);
-			mRootNode->Draw(0);
-		}
+		if (!mRootNode)
+			return;
+		
+		Renderer::Get().BeginDraw();
+		Renderer::Get().DrawNode(mRootNode, 0);
+		mRootNode->Draw(0);
+	}
+	
+	void Canvas::ComputeLayout(Vector2 size)
+	{
+		if (!mRootNode)
+			return;
+		
+		Renderer::Get().SetViewportSize(size);
+
+		float x, y;
+		x = mInputManager->GetMouseX();
+		y = mInputManager->GetMouseY();
+
+		auto root = mRootNode->GetYogaNode();
+
+		// Recompute the node tree.
+		if (Dirty)
+			ComputeStyle(mRootNode);
+
+		mRootNode->Calculate();
+
+		if (root)
+			YGNodeCalculateLayout(root, size.x, size.y, YGDirectionLTR);
 	}
 
-	void Canvas::StyleNode(std::shared_ptr<Node> node)
+	void Canvas::ComputeStyle(NodePtr node)
 	{
 		for (auto& rule : mStyleSheet->Rules)
 		{
@@ -115,27 +136,35 @@ namespace NuakeUI
 
 		for (auto& c : node->GetChildrens())
 		{
-			StyleNode(c);
+			ComputeStyle(c);
 		}
 	}
+	
 
-	void Canvas::Calculate(Vector2 size)
+	// Getters & Setters
+	NodePtr Canvas::GetRoot() const
 	{
-		Renderer::Get().SetViewportSize(size);
+		return mRootNode;
+	}
+	
+	void Canvas::SetRoot(NodePtr root)
+	{
+		mRootNode = root;
+	}
 
-		float x, y;
-		x = InputManager->GetMouseX();
-		y = InputManager->GetMouseY();
+	void Canvas::SetInputManager(InputManager* inputManager)
+	{
+		mInputManager = inputManager;
+	}
 
-		auto root = mRootNode->GetYogaNode();
+	StyleSheetPtr Canvas::GetStyleSheet() const
+	{
+		return mStyleSheet;
+	}
 
-		// ReStyle the node tree.
-		if (Dirty)
-			StyleNode(mRootNode);
-
-		mRootNode->Calculate();
-		
-		if (root)
-			YGNodeCalculateLayout(root, size.x, size.y, YGDirectionLTR);
+	void Canvas::SetStyleSheet(StyleSheetPtr styleSheet)
+	{
+		Dirty = true;
+		mStyleSheet = styleSheet;
 	}
 }

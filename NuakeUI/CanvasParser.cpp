@@ -174,7 +174,7 @@ namespace NuakeUI
 
 		IterateOverElement(parent, root);
 
-		canvas->SetRootNode(root);
+		canvas->SetRoot(root);
 		return canvas;
 	}
 }

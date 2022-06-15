@@ -93,12 +93,14 @@ namespace NuakeUI
 		}
 	};
 
+	class StyleSheet;
+	typedef std::shared_ptr<StyleSheet> StyleSheetPtr;
 	class StyleSheet
 	{
 	public:
 		std::vector<StyleRule> Rules;
 
-		static std::shared_ptr<StyleSheet> New()
+		static StyleSheetPtr New()
 		{
 			return std::make_shared<StyleSheet>();
 		}

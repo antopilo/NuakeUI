@@ -21,6 +21,38 @@ namespace NuakeUI
 		YGNodeStyleSetFlexDirection(mNode, YGFlexDirection::YGFlexDirectionColumn);
 	}
 
+	bool Node::HasDataModel() const
+	{
+		return mDataModel != nullptr;
+	}
+
+	DataModelPtr Node::GetDataModel() const
+	{
+		// Travel upward to find model
+		if (HasDataModel())
+			return mDataModel;
+
+		else if (Parent != nullptr)
+			return Parent->GetDataModel();
+		else
+			return nullptr;
+	}
+
+	void Node::SetDataModel(const DataModelPtr& dataModel)
+	{
+		mDataModel = dataModel;
+	}
+
+	DataModelOperationCollection& Node::GetDataModelOperations()
+	{
+		return mDataModelOperations;
+	}
+
+	void Node::AddDataModelOperation(DataModelOperationPtr& operation)
+	{
+		mDataModelOperations.push_back(operation);
+	}
+
 	void Node::Tick()
 	{
 		// Update the state.
@@ -42,7 +74,6 @@ namespace NuakeUI
 		if (isHover && inputManager->IsMouseInputDown() )
 			State = NodeState::Clicked;
 
-
 		// Calculate Max Scroll delta
 		float totalHeight = 0.0f;
 		for (auto& c : Childrens)
@@ -52,10 +83,11 @@ namespace NuakeUI
 				totalHeight = childrenBottom;
 		}
 		
+		float maxScrollDelta = 0.f;
 		if (totalHeight > ComputedSize.y)
-			MaxScrollDelta = -(ComputedSize.y - totalHeight);
-		else
-			MaxScrollDelta = 0.f;
+		{
+			maxScrollDelta = -(ComputedSize.y - totalHeight);
+		}
 
 		// Scroll the parent and keep the remainder.
 		float scroll = inputManager->GetScrollY();
@@ -64,16 +96,16 @@ namespace NuakeUI
 			const float scrollForce = 40.f;
 			const float scrollAmount = scroll * -scrollForce;
 			float newDelta = ScrollDelta + scrollAmount;
-			if (scrollAmount > .0f)// && )
+			float remainder = 0.0f;
+			if (scrollAmount > .0f)
 			{
-				float remainder = 0.0f;
-				if (ScrollDelta < MaxScrollDelta && newDelta >= MaxScrollDelta)
+				if (ScrollDelta < maxScrollDelta && newDelta >= maxScrollDelta)
 				{
-					remainder = newDelta + MaxScrollDelta;
+					remainder = newDelta + maxScrollDelta;
 					inputManager->ScrollY += scroll;
-					ScrollDelta = MaxScrollDelta;
+					ScrollDelta = maxScrollDelta;
 				}
-				else if (newDelta <= MaxScrollDelta)
+				else if (newDelta <= maxScrollDelta)
 				{
 					ScrollDelta = newDelta;
 					inputManager->ScrollY += scroll;
@@ -81,10 +113,9 @@ namespace NuakeUI
 			}
 			else if(scrollAmount < .0f)
 			{
-				float remainder = 0.f;
 				if(ScrollDelta > 0.f && newDelta <= 0.f)
 				{
-					remainder = newDelta + MaxScrollDelta;
+					remainder = newDelta + maxScrollDelta;
 					inputManager->ScrollY += scroll;
 					ScrollDelta = 0.f;
 				}
@@ -96,8 +127,8 @@ namespace NuakeUI
 			}
 		}
 
-		if (ScrollDelta > MaxScrollDelta)
-			ScrollDelta = MaxScrollDelta;
+		if (ScrollDelta > maxScrollDelta)
+			ScrollDelta = maxScrollDelta;
 
 		for (auto& c : Childrens)
 			c->UpdateInput(inputManager);
@@ -105,25 +136,35 @@ namespace NuakeUI
 
 	void Node::Draw(int z)
 	{
-		z += 1;
+		z++;
 		if (ComputedStyle.Visibility == VisibilityType::Hidden)
-			return;
-
-		for (auto& c : Childrens)
 		{
-			if (c->ModelIf)
+			return;
+		}
+
+		for (const NodePtr& c : Childrens)
+		{
+			bool failedOperation = false;
+			for (const auto& modelOp : c->GetDataModelOperations())
 			{
-				if (!c->ModelIf->Compare(c->GetModel()))
+				if (modelOp->Type == OperationType::If)
 				{
-					continue;
+					const DataModelPtr& model = c->GetDataModel();
+					if (model && !modelOp->Compare(model))
+					{
+						failedOperation = true;
+					}
 				}
 			}
-
-			if (c->ComputedStyle.Visibility == VisibilityType::Hidden)
+			
+			bool isHidden = c->ComputedStyle.Visibility == VisibilityType::Hidden;
+			if (isHidden || failedOperation)
+			{
 				continue;
+			}
 
 			Renderer::Get().DrawNode(c, z);
-			c->Draw(z );
+			c->Draw(z);
 		}
 	}
 
@@ -167,7 +208,8 @@ namespace NuakeUI
 	{
 		child->Parent = this;
 		Childrens.push_back(child);
-		YGNodeInsertChild(this->mNode, child->GetYogaNode(), Childrens.size() - 1);
+		uint32_t index = (uint32_t)Childrens.size() - 1;
+		YGNodeInsertChild(this->mNode, child->GetYogaNode(), index);
 	}
 
 	void Node::ApplyStyleProperties(std::map<StyleProperties, PropValue> properties)

@@ -120,6 +120,8 @@ namespace NuakeUI
 					return *std::get<bool*>(dataBindObject.GetData());
 				}
 			}
+
+			assert(false);
 		}
 
 		template<>
@@ -165,6 +167,22 @@ namespace NuakeUI
 				{
 					auto variant = dataBindObject.GetData();
 					std::string* data = std::get<std::string*>(variant);
+					return *data;
+				}
+			}
+		}
+
+		template<>
+		char& GetData(const std::string& dataName)
+		{
+			assert(HasData(dataName) && "Model has no data with that name.");
+
+			for (auto& dataBindObject : DataObjects)
+			{
+				if (dataBindObject.Name == dataName)
+				{
+					auto variant = dataBindObject.GetData();
+					char* data = std::get<char*>(variant);
 					return *data;
 				}
 			}

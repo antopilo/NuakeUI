@@ -3,41 +3,73 @@
 #include "DataBindObject.h"
 
 #include <string>
+#include <variant>
 
 namespace NuakeUI
 {
 	enum class OperationType
 	{
-		If
+		If, IfClass
 	};
 
 	enum class ComparaisonType
 	{
 		Equal,
 		NotEqual,
-		Greater,
 		GreaterOrEqual,
+		LessOrEqual,
+		Greater,
 		Less,
-		LessOrEqual
+		None
 	};
 
+	class DataModelOperation;
+	typedef std::shared_ptr<DataModelOperation> DataModelOperationPtr;
+	typedef std::vector<DataModelOperationPtr> DataModelOperationCollection;
 	class DataModelOperation
 	{
 	public:
 		std::string Name;
+		std::string ClassName;
+
 		OperationType Type;
 		ComparaisonType CompType;
-		
-		static std::shared_ptr<DataModelOperation> New(const std::string& name, OperationType type, ComparaisonType compType);
-		
-		int RightI;
-		bool RightB;
-		std::string RightS;
-		float RightF;
-		
+
+		std::variant<int, float, bool, std::string, char> Right;
+
+		static DataModelOperationPtr New(const std::string& name, OperationType type, ComparaisonType compType);
 		DataModelOperation(const std::string& name, OperationType type, ComparaisonType compType);
 		~DataModelOperation() = default;
 
-		bool Compare(std::shared_ptr<DataModel> object);
+		template<typename T> 
+		bool CompareLeftAndRight(const T& left, const T& right, const ComparaisonType& compType)
+		{
+			if (CompType == ComparaisonType::Equal)
+			{
+				return left == right;
+			}
+			else if (CompType == ComparaisonType::NotEqual)
+			{
+				return left != right;
+			}
+			else if (CompType == ComparaisonType::GreaterOrEqual)
+			{
+				return left >= right;
+			}
+			else if (CompType == ComparaisonType::LessOrEqual)
+			{
+				return left <= right;
+			}
+			else if (CompType == ComparaisonType::Greater)
+			{
+				return left > right;
+			}
+			else if (CompType == ComparaisonType::Less)
+			{
+				return left < right;
+			}
+		}
+
+		bool Compare(DataModelPtr object);
 	};
 }

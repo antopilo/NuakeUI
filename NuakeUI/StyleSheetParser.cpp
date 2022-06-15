@@ -21,7 +21,7 @@ namespace NuakeUI
 		if (data->errors.length > 0)
 		{
 			KatanaArray errors = data->errors;
-			for (int i = 0; i < errors.length; i++)
+			for (uint32_t i = 0; i < errors.length; i++)
 			{
 				KatanaError* error = (KatanaError*)errors.data[i];
 				std::cout << "Failed to parse css file \"" + path + "\"." << std::endl;
@@ -33,7 +33,7 @@ namespace NuakeUI
 		}
 		else
 		{
-			for (int i = 0; i < data->stylesheet->rules.length; i++)
+			for (uint32_t i = 0; i < data->stylesheet->rules.length; i++)
 			{
 				KatanaRule* rule = (KatanaRule*)data->stylesheet->rules.data[i];
 
@@ -96,6 +96,9 @@ namespace NuakeUI
 		else if (prop == "overflow")			return StyleProperties::Overflow;
 		else if (prop == "font-size")			return StyleProperties::FontSize;
 		else if (prop == "visibility")			return StyleProperties::Visibility;
+
+		return StyleProperties::None;
+
 	}
 
 	void StyleSheetParser::ParseStyleRule(KatanaRule* rule, std::shared_ptr<StyleSheet> styleSheet)
@@ -103,7 +106,7 @@ namespace NuakeUI
 		auto styleRule = reinterpret_cast<KatanaStyleRule*>(rule);
 		std::string styleName = rule->name;
 		
-		for (int s = 0; s < styleRule->selectors->length; s++)
+		for (uint32_t s = 0; s < styleRule->selectors->length; s++)
 		{
 			auto styleSelector = std::vector<StyleSelector>();
 
@@ -148,7 +151,7 @@ namespace NuakeUI
 			auto newRule = StyleRule(styleSelector);
 
 			// Now add the properties to the new rule.
-			for (int d = 0; d < styleRule->declarations->length; d++)
+			for (uint32_t d = 0; d < styleRule->declarations->length; d++)
 			{
 				// unsafe c-style void* in the array.
 				void* declarationData = styleRule->declarations->data[d];
@@ -158,7 +161,7 @@ namespace NuakeUI
 				StyleProperties propType = GetPropFromString(declaration->property);
 
 				PropValue propValue{};
-				for (auto v = 0; v < declaration->values->length; v++)
+				for (uint32_t v = 0; v < declaration->values->length; v++)
 				{
 					// unsafe c-style voir* in the array.
 					void* valueData = declaration->values->data[v];
@@ -169,14 +172,14 @@ namespace NuakeUI
 						case KatanaValueUnit::KATANA_VALUE_PERCENTAGE:
 						case KatanaValueUnit::KATANA_VALUE_PX:
 						{
-							propValue.value.Number = value->fValue;
+							propValue.value.Number = (float)value->fValue;
 							propValue.type = value->unit == KatanaValueUnit::KATANA_VALUE_PX ? PropValueType::Pixel : PropValueType::Percent;
 						}
 						break;
 						case KatanaValueUnit::KATANA_VALUE_PARSER_HEXCOLOR:
 						{
 							int r, g, b, a = 255;
-							int result = sscanf(value->string, "%02x%02x%02x%02x", &r, &g, &b, &a);
+							int result = sscanf_s(value->string, "%02x%02x%02x%02x", &r, &g, &b, &a);
 							propValue.value.Color = Color(r, g, b, a);
 							propValue.type = PropValueType::Color;
 						}

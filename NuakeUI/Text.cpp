@@ -45,7 +45,7 @@ namespace NuakeUI
 		float y = YGNodeLayoutGetTop(mNode);
 
 		// Centers the text in the line height.
-		y += (mFont->LineHeight / 64.0) * (ComputedStyle.FontSize) / 2.0f;
+		y += (mFont->LineHeight / 64.0f) * (ComputedStyle.FontSize) / 2.0f;
 
 		x += YGNodeLayoutGetPadding(mNode, YGEdgeLeft);
 		y += YGNodeLayoutGetPadding(mNode, YGEdgeTop);
@@ -75,10 +75,10 @@ namespace NuakeUI
 		if (hideOverflow)
 		{
 			glEnable(GL_SCISSOR_TEST);
-			float clipX = Parent->ComputedPosition.x;
-			float clipY = (1080 - Parent->ComputedPosition.y - Parent->ComputedSize.y);
-			float clipWidth = Parent->ComputedSize.x;
-			float clipHeight = Parent->ComputedSize.y;
+			int clipX = (int)Parent->ComputedPosition.x;
+			int clipY = (1080 - (int)Parent->ComputedPosition.y - (int)Parent->ComputedSize.y);
+			int clipWidth = (int)Parent->ComputedSize.x;
+			int clipHeight = (int)Parent->ComputedSize.y;
 			glScissor(clipX, clipY, clipWidth, clipHeight);
 		}
 
@@ -112,7 +112,7 @@ namespace NuakeUI
 			// Iterate over each character and add up the advance.
 			for (char const& c : l)
 			{
-				Char& letter = mFont->GetChar((int)c);
+				Char letter = mFont->GetChar((int)c);
 				textWidth += (letter.Advance);
 			}
 

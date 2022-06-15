@@ -34,7 +34,7 @@ namespace NuakeUI
 
 		mVertexArray = std::make_shared<NuakeRenderer::VertexArray>();
 		mVertexArray->Bind();
-		mVertexBuffer = std::make_shared<NuakeRenderer::VertexBuffer>(vertices.data(), vertices.size() * sizeof(Vertex));
+		mVertexBuffer = std::make_shared<NuakeRenderer::VertexBuffer>(vertices.data(), (unsigned int)(vertices.size() * sizeof(Vertex)));
 		
 		auto vbl = NuakeRenderer::VertexBufferLayout();
 		vbl.Push<float>(3); // Position
@@ -65,7 +65,9 @@ namespace NuakeUI
 
 	void Renderer::BeginDraw()
 	{
-		glViewport(0, 0, mSize.x, mSize.y);
+		int viewportW = (int)mSize.x;
+		int viewportH = (int)mSize.y;
+		glViewport(0, 0, viewportW, viewportH);
 	}
 
 	void Renderer::DrawNode(std::shared_ptr<Node> node, int z)
@@ -78,7 +80,6 @@ namespace NuakeUI
 		{
 			parentScroll = node->Parent->ScrollDelta;
 		}
-			
 
 		const YGNodeRef yogaNode = node->GetYogaNode();
 		const float width = YGNodeLayoutGetWidth(yogaNode) - parentPaddingRight;
@@ -121,7 +122,13 @@ namespace NuakeUI
 		if (hideOverflow)
 		{
 			glEnable(GL_SCISSOR_TEST);
-			glScissor(node->Parent->ComputedPosition.x, (1080 - node->Parent->ComputedPosition.y - node->Parent->ComputedSize.y), node->Parent->ComputedSize.x, node->Parent->ComputedSize.y);
+			Vector2 parentPosition = node->Parent->ComputedPosition;
+			Vector2 parentSize = node->Parent->ComputedSize;
+			int scissorX = (int)parentPosition.x;
+			int scissorY = 1080 - (int)(parentPosition.y - parentSize.y);
+			int scissorW = (int)parentSize.x;
+			int scissorH = (int)parentSize.y;
+			glScissor(scissorX, scissorY, scissorW, scissorH);
 		}
 
 		mVertexArray->Bind();
@@ -156,7 +163,7 @@ namespace NuakeUI
 		float advance = 0.0f;
 		for (char const& c : string)
 		{
-			Char& letter = font->GetChar((int)c);
+			Char letter = font->GetChar((int)c);
 
 			// Move the cursor
 			Matrix4 model = Matrix4(1.f);
@@ -166,8 +173,8 @@ namespace NuakeUI
 			advance += (letter.Advance);
 
 			// Scaling of the quad
-			float scaleX = letter.PlaneBounds.right - letter.PlaneBounds.left;
-			float scaleY = letter.PlaneBounds.top - letter.PlaneBounds.bottom;
+			float scaleX = (float)(letter.PlaneBounds.right - letter.PlaneBounds.left);
+			float scaleY = (float)(letter.PlaneBounds.top - letter.PlaneBounds.bottom);
 			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
 
 			// Set Uniforms

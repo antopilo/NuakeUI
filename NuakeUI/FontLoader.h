@@ -52,7 +52,7 @@ namespace NuakeUI
 			// Setup generator settings
 			generator.setAttributes(config.generatorAttributes);
 			generator.setThreadCount(config.threadCount);
-			generator.generate(glyphs.data(), glyphs.size());
+			generator.generate(glyphs.data(), (int)glyphs.size());
 
 			// Create bitmap
 			msdfgen::BitmapConstRef<T, N> bitmap = (msdfgen::BitmapConstRef<T, N>) generator.atlasStorage();
@@ -114,7 +114,7 @@ namespace NuakeUI
 			atlasPacker.setMiterLimit(config.miterLimit);
 
 			// Pack atlas
-			if (int remaining = atlasPacker.pack(glyphs.data(), glyphs.size())) {
+			if (int remaining = atlasPacker.pack(glyphs.data(), (int)glyphs.size())) {
 				if (remaining < 0) {
 					printf("Critial - Failed to pack atlas");
 				}
@@ -143,7 +143,7 @@ namespace NuakeUI
 				unsigned long long glyphSeed = (6364136223846793005ull * (config.coloringSeed ^ i) + 1442695040888963407ull) * !!config.coloringSeed;
 				glyphs[i].edgeColoring(config.edgeColoring, config.angleThreshold, glyphSeed);
 				return true;
-				}, glyphs.size()).finish(config.threadCount);
+				}, (int)glyphs.size()).finish(config.threadCount);
 
 				// Create bitmap and char structure
 				auto bitmap = makeAtlas<byte, float, 4, msdf_atlas::mtsdfGenerator>(glyphs, fonts, config, font);
@@ -157,11 +157,11 @@ namespace NuakeUI
 
 					double x2, y2, z2, w2;
 					g.getQuadAtlasBounds(x2, y2, z2, w2);
-					box.Pos.x = x2;
-					box.Pos.y = y2;
-					box.Size.x = z2;
-					box.Size.y = w2;
-					font->AddChar(g.getCodepoint(), g.getAdvance(), plane, box);
+					box.Pos.x = (float)x2;
+					box.Pos.y = (float)y2;
+					box.Size.x = (float)z2;
+					box.Size.y = (float)w2;
+					font->AddChar(g.getCodepoint(), (float)g.getAdvance(), plane, box);
 				}
 
 				return font;

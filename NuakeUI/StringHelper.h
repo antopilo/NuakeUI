@@ -30,10 +30,10 @@ namespace NuakeUI
 			return splittedString;
 		}
 
-		std::string RemoveChar(std::string string, const char character)
+		std::string RemoveChar(std::string string, char character)
 		{
 			// remove space from string
-			string.erase(std::remove(string.begin(), string.end(), ' '), string.end());
+			string.erase(std::remove(string.begin(), string.end(), character), string.end());
 			return string;
 		}
 
@@ -52,6 +52,16 @@ namespace NuakeUI
 			splits.push_back(s);
 
 			return splits;
+		}
+
+		bool StartsWith(const std::string& str, const std::string& start)
+		{
+			return str.size() >= start.size() && 0 == str.compare(0, start.size(), start);
+		}
+
+		bool EndsWith(const std::string& str, const std::string& end)
+		{
+			return str.size() >= end.size() && 0 == str.compare(str.size() - end.size(), end.size(), end);
 		}
 	}
 }

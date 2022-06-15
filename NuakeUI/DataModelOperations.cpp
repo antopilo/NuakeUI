@@ -10,12 +10,12 @@ namespace NuakeUI
 		CompType = compType;
 	}
 
-	std::shared_ptr<DataModelOperation> DataModelOperation::New(const std::string& name, OperationType type, ComparaisonType compType)
+	DataModelOperationPtr DataModelOperation::New(const std::string& name, OperationType type, ComparaisonType compType)
 	{
 		return std::make_shared<DataModelOperation>(name, type, compType);
 	}
 
-	bool DataModelOperation::Compare(std::shared_ptr<DataModel> object)
+	bool DataModelOperation::Compare(DataModelPtr object)
 	{
 		if (!object->HasData(Name))
 		{
@@ -24,32 +24,27 @@ namespace NuakeUI
 		}
 		
 		DataBindType dataType = object->GetDataType(Name);
+		auto dataRight = Right;
+
 		switch (dataType)
 		{
 			case DataBindType::Bool:
-				return object->GetData<bool>(Name);
+				return CompareLeftAndRight<bool>(object->GetData<bool>(Name), std::get<bool>(Right), CompType);
+				break;
 			case DataBindType::Int:
-			{
-				int data = object->GetData<int>(Name);
-				switch (CompType)
-				{
-				case ComparaisonType::Equal:
-					return data == RightI;
-				case ComparaisonType::NotEqual:
-					return data != RightI;
-				case ComparaisonType::Greater:
-					return data > RightI;
-				case ComparaisonType::GreaterOrEqual:
-					return data >= RightI;
-				case ComparaisonType::Less:
-					return data < RightI;
-				case ComparaisonType::LessOrEqual:
-					return data <= RightI;
-				}
-			}
-			break;
+				return CompareLeftAndRight<int>(object->GetData<int>(Name), std::get<int>(Right), CompType);
+				break;
+			case DataBindType::Float:
+				return CompareLeftAndRight<float>(object->GetData<float>(Name), std::get<float>(Right), CompType);
+				break;
+			case DataBindType::String:
+				return CompareLeftAndRight<std::string>(object->GetData<std::string>(Name), std::get<std::string>(Right), CompType);
+				break;
+			case DataBindType::Char:
+				return CompareLeftAndRight<char>(object->GetData<char>(Name), std::get<char>(Right), CompType);
+				break;
 		}
-		
+
 		return false;
 	}
 }

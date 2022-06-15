@@ -75,6 +75,20 @@ namespace NuakeUI
 
 	void Canvas::ComputeStyle(NodePtr node)
 	{
+		for (auto& s : node->GetDataModelOperations())
+		{
+			if (s->Type != OperationType::IfClass)
+				continue;
+
+			if (s->Compare(node->GetDataModel()))
+			{
+				node->AddClass(s->ClassName);
+			}
+			else
+			{
+				node->RemoveClass(s->ClassName);
+			}
+		}
 		for (auto& rule : mStyleSheet->Rules)
 		{
 			bool respectSelector = true;

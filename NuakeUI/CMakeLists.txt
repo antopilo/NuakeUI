@@ -20,7 +20,7 @@ StyleSheetParser.h StyleSheetParser.cpp
 InputManager.h InputManager.cpp StringHelper.h NodeState.h 
 DataBindObject.h DataBindObject.cpp DataBindOperation.h 
 DataModelOperations.h DataModelOperations.cpp 
-NuakeUI.h
+NuakeUI.h NodeStyle.h
 )
 
 target_link_libraries(NuakeUI PUBLIC NuakeRenderer yogacore msdf-atlas-gen)

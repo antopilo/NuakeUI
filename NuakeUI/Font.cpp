@@ -29,7 +29,7 @@ namespace NuakeUI
 		msdfgen::FontMetrics metrics;
 		msdfgen::getFontMetrics(metrics, mFontHandle);
 
-		LineHeight = metrics.lineHeight;
+		LineHeight = (float)metrics.lineHeight;
 		return true;
 	}
 }

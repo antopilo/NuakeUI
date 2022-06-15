@@ -75,8 +75,6 @@ break; \
 
 namespace NuakeUI
 {
-	
-
 	enum class NodeType
 	{
 		Node, Button, Checkbox, Text
@@ -93,10 +91,10 @@ namespace NuakeUI
 		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
 		NodeType mType = NodeType::Node;
 
+		DataModelOperationCollection mDataModelOperations;
 		DataModelPtr mDataModel;
 	public:
 		float ScrollDelta = 0.0f;
-		float MaxScrollDelta = 0.0f;
 
 		Vector2 ComputedSize = {0, 0};
 		Vector2 ComputedPosition = {0, 0};
@@ -104,11 +102,24 @@ namespace NuakeUI
 
 		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
-		
-		std::shared_ptr<DataModelOperation> ModelIf;
 
 		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
-		void AddClass(const std::string& c) { Classes.push_back(c); }
+		void AddClass(const std::string& c) 
+		{ 
+			bool containClass = false;
+			for (auto& classe : Classes)
+			{
+				if (c == classe)
+				{
+					containClass = true;
+				}
+			}
+
+			if (!containClass)
+			{
+				Classes.push_back(c);
+			}
+		}
 		void RemoveClass(const std::string& c)
 		{
 			bool found = false;
@@ -158,18 +169,15 @@ namespace NuakeUI
 		YGNodeRef GetYogaNode() const { return mNode; }
 		std::string GetID() const { return ID; }
 
-		bool HasDataModel() const { return mDataModel != nullptr; }
-		DataModelPtr GetDataModel() const { return mDataModel; }
-		void SetDataModel(DataModelPtr dataModel)
-		{
-			mDataModel = dataModel;
-		}
+		bool HasDataModel() const;
+		DataModelPtr GetDataModel() const;
+		void SetDataModel(const DataModelPtr& dataModel);
 
-		// Childrens
+		DataModelOperationCollection& GetDataModelOperations();
+		void AddDataModelOperation(DataModelOperationPtr& operation);
+
 		std::vector<NodePtr> GetChildrens() const;
 		void InsertChild(NodePtr child);
-
-
 
 		template<class T>
 		std::shared_ptr<T> GetChild(unsigned int index)
@@ -224,18 +232,6 @@ namespace NuakeUI
 			}
 
 			return false;
-		}
-
-		std::shared_ptr<DataModel> GetModel()
-		{
-			// Travel updward to find model
-			if (HasDataModel())
-				return GetDataModel();
-
-			else if (Parent != nullptr)
-				return Parent->GetModel();
-			else
-				return nullptr;
 		}
 	};
 }

@@ -10,9 +10,8 @@
 
 namespace NuakeUI
 {
-	enum class NodeState;
 	enum class StyleProperties {
-		Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
+		None, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
 		PaddingLeft, PaddingTop, PaddingRight, PaddingBottom,
 		MarginLeft, MarginTop, MarginRight, MarginBottom, 
 		Position, AlignItems, SelfAlign,
@@ -79,7 +78,7 @@ namespace NuakeUI
 			Properties[prop] = value;
 		}
 
-		PropValue& GetProp(StyleProperties prop)
+		PropValue GetProp(StyleProperties prop)
 		{
 			if (HasProp(prop))
 				return Properties[prop];

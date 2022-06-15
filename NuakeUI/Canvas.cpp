@@ -13,7 +13,7 @@ namespace NuakeUI
 		return std::make_shared<Canvas>();
 	}
 	
-	Canvas::Canvas() : mInputManager(nullptr)
+	Canvas::Canvas() : mInputManager(nullptr), mDirty(false)
 	{
 		mYogaConfig = YGConfigNew();
 		mYogaConfig->useWebDefaults = false;
@@ -64,7 +64,7 @@ namespace NuakeUI
 		auto root = mRootNode->GetYogaNode();
 
 		// Recompute the node tree.
-		if (Dirty)
+		if (mDirty)
 			ComputeStyle(mRootNode);
 
 		mRootNode->Calculate();
@@ -164,7 +164,7 @@ namespace NuakeUI
 
 	void Canvas::SetStyleSheet(StyleSheetPtr styleSheet)
 	{
-		Dirty = true;
+		mDirty = true;
 		mStyleSheet = styleSheet;
 	}
 }

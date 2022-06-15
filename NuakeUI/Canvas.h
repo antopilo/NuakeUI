@@ -22,9 +22,9 @@ namespace NuakeUI
 		StyleSheetPtr mStyleSheet;
 
 		NodePtr mRootNode;
-	public:
-		bool Dirty = false;
 		
+		bool mDirty;
+	public:
 		static CanvasPtr New();
 		Canvas();
 		~Canvas();

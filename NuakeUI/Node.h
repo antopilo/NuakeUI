@@ -75,25 +75,34 @@ break; \
 
 namespace NuakeUI
 {
-	enum class NodeType
-	{
-		Node, Button, Checkbox, Text
-	};
+
 
 	class Node;
 	typedef std::shared_ptr<Node> NodePtr;
 	
+	class CanvasParser;
 	class Node
 	{
+		friend CanvasParser;
 	protected:
-		std::string ID = ""; // Name of the node in the tree
-		YGNodeRef mNode; // Yoga_CPP nodes.
+		std::string ID = "";
+		std::string Type = "node";
+
+		YGNodeRef mNode;
 		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
-		NodeType mType = NodeType::Node;
 
 		DataModelOperationCollection mDataModelOperations;
 		DataModelPtr mDataModel;
+
+		bool mHasBeenInitialized = false;
+		void InitializeNode();
 	public:
+		std::string GetType() const
+		{
+			return Type;
+		}
+
+		bool HasBeenInitialized() const;
 		float ScrollDelta = 0.0f;
 
 		Vector2 ComputedSize = {0, 0};
@@ -103,7 +112,7 @@ namespace NuakeUI
 		NodeState State = NodeState::Idle;
 		NodeStyle ComputedStyle; // The current visual styles.
 
-		std::vector<std::string> Classes = std::vector<std::string>(); // List of css classes.
+		std::vector<std::string> Classes = std::vector<std::string>();
 		void AddClass(const std::string& c) 
 		{ 
 			bool containClass = false;
@@ -136,6 +145,7 @@ namespace NuakeUI
 
 			if(found)
 				Classes.erase(Classes.begin() + i);
+
 		}
 		bool HasClass(const std::string& c) const
 		{
@@ -146,13 +156,12 @@ namespace NuakeUI
 		}
 
 		// Should be used to creates nodes since it creates a shared_ptr for you.
-		static NodePtr New(const std::string id);
+		static NodePtr New(const std::string id, const std::string& value = "");
 
-		Node(const std::string& id); // Do not use.
+		Node(const std::string& id, const std::string& value = ""); // Do not use.
 		Node() = default;
 		~Node() = default;
 
-		inline NodeType GetType() const { return mType; }
 	public:
 		std::any UserData;
 

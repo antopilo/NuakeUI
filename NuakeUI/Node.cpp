@@ -5,20 +5,31 @@
 
 namespace NuakeUI
 {
-	NodePtr Node::New(const std::string id)
+	NodePtr Node::New(const std::string id, const std::string& value)
 	{
-		return std::make_shared<Node>(id);
+		return std::make_shared<Node>(id, value);
 	}
 
-	Node::Node(const std::string& id) : ID(id)
+	Node::Node(const std::string& id, const std::string& value) : ID(id)
 	{
-		assert(id != "");
+		InitializeNode();
+
+		YGNodeStyleSetFlexDirection(mNode, YGFlexDirection::YGFlexDirectionColumn);
+	}
+
+	void Node::InitializeNode()
+	{
+		if (mHasBeenInitialized)
+			return;
+
 		mNode = YGNodeNew();
 		Childrens = std::vector<NodePtr>();
+		mHasBeenInitialized = true;
+	}
 
-		YGNodeStyleSetWidthAuto(mNode);
-		YGNodeStyleSetWidthAuto(mNode);
-		YGNodeStyleSetFlexDirection(mNode, YGFlexDirection::YGFlexDirectionColumn);
+	bool Node::HasBeenInitialized() const
+	{
+		return mHasBeenInitialized;
 	}
 
 	bool Node::HasDataModel() const
@@ -206,6 +217,8 @@ namespace NuakeUI
 
 	void Node::InsertChild(NodePtr child)
 	{
+		if (!mHasBeenInitialized)
+			InitializeNode();
 		child->Parent = this;
 		Childrens.push_back(child);
 		uint32_t index = (uint32_t)Childrens.size() - 1;

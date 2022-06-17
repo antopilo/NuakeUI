@@ -14,7 +14,6 @@ namespace NuakeUI
 	{
 		ID = id;
 		mNode = YGNodeNew();
-		mType = NodeType::Text;
 
 		mFont = Renderer::Get().mDefaultFont;
 

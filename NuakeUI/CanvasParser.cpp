@@ -13,33 +13,51 @@
 
 namespace NuakeUI
 {
+	CanvasParser::CanvasParser()
+	{
+		RegisterNodeType("div", Node::New);
+		RegisterNodeType("text", Text::New);
+		RegisterNodeType("button", Button::New);
+	}
+
+	void CanvasParser::RegisterNodeType(const std::string& name, refNew refConstructor)
+	{
+		NodeTypes[name] = refConstructor;
+	}
+
+	bool CanvasParser::HasNodeType(const std::string& name) const
+	{
+		return NodeTypes.find(name) != NodeTypes.end();
+	}
+
+	refNew CanvasParser::GetNodeType(const std::string& name) const
+	{
+		if (HasNodeType(name))
+		{
+			return NodeTypes.at(name);
+		}
+
+		return nullptr;
+	}
+
 	NodePtr CanvasParser::CreateNodeFromXML(tinyxml2::XMLElement* xml, const std::string& id)
 	{
 		NodePtr newNode;
 		std::string nodeId = id;
 		std::string type = xml->Value();
+		std::string text = xml->GetText() ? xml->GetText() : "";
 
-		if (type == "div") 
+		if (HasNodeType(type))
 		{
-			newNode = Node::New(id);
-		}
-		else if (type == "text")
-		{
-			if (nodeId == "Node")
-				nodeId = "Text";
+			newNode = GetNodeType(type)(nodeId, text);
+			newNode->Type = type;
 
-			std::string text = xml->GetText() ? xml->GetText() : "";
-			newNode = Text::New(id, text);
+			if (!newNode->HasBeenInitialized())
+			{
+				newNode->InitializeNode();
+			}
 		}
-		else if (type == "button")
-		{
-			if (nodeId == "Node")
-				nodeId = "Button";
-
-			std::string text = xml->GetText() ? xml->GetText() : "";
-			newNode = Button::New(id, text);
-		}
-
+		
 		return newNode;
 	}
 
@@ -176,18 +194,23 @@ namespace NuakeUI
 			// Look if the node has an id.
 			auto idAttribute = current->FindAttribute("id");
 			if (idAttribute)
+			{
 				id = idAttribute->Value();
+			}
 
 			NodePtr newNode = CreateNodeFromXML(current, id);
-			AddClassesToNode(current, newNode);
-			AddModelIfToNode(current, newNode);
-			AddModelClasses(current, newNode);
+			if (newNode)
+			{
+				AddClassesToNode(current, newNode);
+				AddModelIfToNode(current, newNode);
+				AddModelClasses(current, newNode);
 
-			// Insert in the tree
-			node->InsertChild(newNode);
+				// Insert in the tree
+				node->InsertChild(newNode);
 
-			// Recursivity on the childs of the current node.
-			IterateOverElement(current->FirstChildElement(), newNode);
+				// Recursivity on the childs of the current node.
+				IterateOverElement(current->FirstChildElement(), newNode);
+			}
 
 			// Continue to the sibbling after going Depth first.
 			current = current->NextSiblingElement();

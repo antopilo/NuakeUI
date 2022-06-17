@@ -11,9 +11,7 @@ namespace NuakeUI
 	Button::Button(const std::string& name, const std::string& label) :
 		Label(label)
 	{
-		mType = NodeType::Button;
 		ID = name;
-		mNode = YGNodeNew();
 		InsertChild(Text::New(ID + "lbl", Label));
 	}
 

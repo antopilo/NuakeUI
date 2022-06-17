@@ -118,25 +118,10 @@ namespace NuakeUI
 				}
 				else if (selector.Type == StyleSelectorType::Tag)
 				{
-					if (selector.Value == "text" &&
-						node->GetType() == NodeType::Text)
+					if (selector.Value == node->GetType())
 					{
 						foundSelector = true;
-					}
-					else if (selector.Value == "div" &&
-						node->GetType() == NodeType::Node)
-					{
-						foundSelector = true;
-					}
-					else if (selector.Value == "button" &&
-						node->GetType() == NodeType::Button)
-					{
-						foundSelector = true;
-					}
-					else if (selector.Value == "checkbox" &&
-						node->GetType() == NodeType::Checkbox)
-					{
-						foundSelector = true;
+
 					}
 				}
 

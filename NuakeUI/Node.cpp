@@ -17,6 +17,42 @@ namespace NuakeUI
 		YGNodeStyleSetFlexDirection(mNode, YGFlexDirection::YGFlexDirectionColumn);
 	}
 
+	std::string Node::GetID() const
+	{
+		return ID;
+	}
+
+	uint32_t Node::GetIndex() const
+	{
+		if (!Parent)
+		{
+			return -1;
+		}
+
+		uint32_t i = 0;
+		for (auto& c : Parent->GetChildrens())
+		{
+			if (c->mNode == mNode)
+			{
+				return i;
+			}
+
+			i++;
+		}
+
+		return -1;
+	}
+
+	YGNodeRef Node::GetYogaNode() const
+	{
+		return mNode;
+	}
+
+	std::string Node::GetType() const
+	{
+		return Type;
+	}
+
 	void Node::InitializeNode()
 	{
 		if (mHasBeenInitialized)
@@ -54,6 +90,11 @@ namespace NuakeUI
 		mDataModel = dataModel;
 	}
 
+	float Node::GetScroll() const
+	{
+		return ScrollDelta;
+	}
+
 	DataModelOperationCollection& Node::GetDataModelOperations()
 	{
 		return mDataModelOperations;
@@ -64,26 +105,59 @@ namespace NuakeUI
 		mDataModelOperations.push_back(operation);
 	}
 
-	void Node::Tick()
+	void Node::Tick(InputManager* inputManager)
 	{
+		OnTick(inputManager);
+
 		// Update the state.
 		for (auto& c : Childrens)
-			c->Tick();
+			c->Tick(inputManager);
 	}
 
 	void Node::UpdateInput(InputManager* inputManager)
 	{
+		inputManager = inputManager;
 		float mx = inputManager->GetMouseX();
 		float my = inputManager->GetMouseY();
 
 		bool isHover = IsMouseHover(mx, my);
-		if (!isHover)
-			State = NodeState::Idle;
-		else
-			State = NodeState::Hover;
 
-		if (isHover && inputManager->IsMouseInputDown() )
+		bool isMouseDown = inputManager->IsMouseInputDown();
+		if (State == NodeState::Clicked && !isMouseDown)
+		{
+			State == NodeState::Hover;
+			OnClickReleased(Vector2(mx, my));
+		}
+
+		if (!isHover)
+		{
+			if (!isMouseDown)
+			{
+				if (State != NodeState::Idle)
+				{
+					OnMouseExit();
+				}
+
+				State = NodeState::Idle;
+			}
+		}
+		else
+		{
+			if (State != NodeState::Hover)
+			{
+				OnMouseHover(Vector2(mx, my));
+			}
+
+			State = NodeState::Hover;
+		}
+			
+
+		if (isHover && isMouseDown)
+		{
+			OnClick(Vector2(mx, my));
+
 			State = NodeState::Clicked;
+		}
 
 		// Calculate Max Scroll delta
 		float totalHeight = 0.0f;
@@ -104,6 +178,8 @@ namespace NuakeUI
 		float scroll = inputManager->GetScrollY();
 		if (std::abs(scroll) > 0.f && ComputedStyle.Overflow == OverflowType::Scroll && isHover)
 		{
+			OnScroll(scroll);
+
 			const float scrollForce = 40.f;
 			const float scrollAmount = scroll * -scrollForce;
 			float newDelta = ScrollDelta + scrollAmount;
@@ -219,6 +295,7 @@ namespace NuakeUI
 	{
 		if (!mHasBeenInitialized)
 			InitializeNode();
+
 		child->Parent = this;
 		Childrens.push_back(child);
 		uint32_t index = (uint32_t)Childrens.size() - 1;
@@ -269,7 +346,7 @@ namespace NuakeUI
 				EnumProp(AlignContent)
 				EnumProp(LayoutDirection)
 				case StyleProperties::BorderSize:
-					ComputedStyle.BorderSize = std::clamp(value.value.Number, 0.f, ComputedSize.x - ComputedStyle.BorderRadius);
+					ComputedStyle.BorderSize = std::clamp(value.value.Number, 0.f, ComputedSize.x / 2.0f);
 					break;
 				case StyleProperties::BorderRadius:
 					ComputedStyle.BorderRadius = value.value.Number;

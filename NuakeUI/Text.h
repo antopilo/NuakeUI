@@ -7,7 +7,8 @@
 
 namespace NuakeUI
 {
-
+	class Text;
+	typedef std::shared_ptr<Text> TextPtr;
 
 	class Text : public Node
 	{
@@ -22,7 +23,6 @@ namespace NuakeUI
 		void SetText(const std::string& text);
 
 		void Calculate() override;
-		void Tick() override {};
 		void UpdateInput(InputManager* manager) override {};
 		void Draw(int z) override;
 

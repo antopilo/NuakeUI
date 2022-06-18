@@ -54,7 +54,7 @@ namespace NuakeUI
 		if (hasParent)
 		{
 			x += parent->ComputedPosition.x;
-			y += parent->ComputedPosition.y - parent->ScrollDelta;
+			y += parent->ComputedPosition.y - parent->GetScroll();
 		}
 
 		Vector3 position = Vector3(x, y, z);

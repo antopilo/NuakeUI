@@ -24,7 +24,6 @@ namespace NuakeUI
 		std::function<void(Button&)> ClickCallback;
 
 		void Draw();
-		void Tick() override;
 		void UpdateInput(InputManager* inputManager) override;
 
 		void SetClickCallback(std::function<void(Button&)> callback)

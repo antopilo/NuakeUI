@@ -46,9 +46,4 @@ namespace NuakeUI
 		for (auto& c : Childrens)
 			c->UpdateInput(inputManager);
 	}
-
-	void Button::Tick()
-	{
-		
-	}
 }

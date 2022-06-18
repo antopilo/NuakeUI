@@ -24,6 +24,7 @@ namespace NuakeUI
 		// Appends the classes of the node next to the name
 		// Logic is only add [] if theres is a class and only add commans in between.
 		std::string nodeTitle = node->GetID();
+		nodeTitle = nodeTitle == "" ? node->GetType() : nodeTitle;
 		const int classAmount = node->Classes.size();
 		if (classAmount > 0)
 		{
@@ -70,14 +71,8 @@ namespace NuakeUI
 		ImGui::Separator();
 		ImGui::DragFloat("Border Size", &mSelectedNode->ComputedStyle.BorderSize, 1.f, 0.f);
 		ImGui::ColorEdit4("Border Color", (float*)&mSelectedNode->ComputedStyle.BorderColor);
-
-		if (type == NodeType::Text)
-		{
-			auto text = std::reinterpret_pointer_cast<Text>(mSelectedNode);
-			ImGui::DragFloat("Font Size", &text->ComputedStyle.FontSize, 1.f, 0.f);
-			ImGui::ColorEdit4("Font Color", (float*)&text->ComputedStyle.FontColor);
-			ImGui::ColorEdit4("Font Background Color", (float*)&text->ComputedStyle.BackgroundColor);
-		}
+		ImGui::DragFloat("Font Size", &mSelectedNode->ComputedStyle.FontSize, 1.f, 0.f);
+		ImGui::ColorEdit4("Font Color", (float*)&mSelectedNode->ComputedStyle.FontColor);
 	}
 
 	static void DrawInspector(std::shared_ptr<Canvas> canvas)
@@ -98,7 +93,7 @@ namespace NuakeUI
 					const ImVec2 size2 = ImVec2(treeWidth * 0.5f, availHeight);
 					if (ImGui::BeginChild("Tree", size))
 					{
-						DrawUI(canvas->GetRootNode());
+						DrawUI(canvas->GetRoot());
 					}
 					ImGui::EndChild();
 
@@ -195,8 +190,6 @@ namespace NuakeUI
 							ImGui::Text("}");
 							ri++;
 						}
-
-						canvas->Dirty = true;
 					}
 					ImGui::EndChild();
 					ImGui::EndTabItem();

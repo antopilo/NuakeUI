@@ -24,7 +24,7 @@ namespace NuakeUI
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };
 	enum class FlexWrapType { NoWrap, Wrap, WrapReversed };
 	enum class JustifyContentType { FlexStart, FlexEnd, Center, SpaceBetween, SpaceAround, SpaceEvenly };
-	enum class FlexDirectionType { Row, Column, RowReversed, ColumnReversed };
+	enum class FlexDirectionType { Row = 0, Column, RowReversed, ColumnReversed };
 	enum class AlignContentType { FlexStart, FlexEnd, Stretch, Center, SpaceBetween, SpaceAround };
 	enum class LayoutDirectionType { LTR = 2, RTL = 3 };
 
@@ -50,6 +50,31 @@ namespace NuakeUI
 	{
 		PropValueType type;
 		Value value;
+
+		PropValue()
+		{
+
+		}
+
+		PropValue(PropValueType t, float f)
+		{
+			type = t;
+			value.Number = f;
+		}
+
+		PropValue(int i)
+		{
+			type = PropValueType::Enum;
+			value.Enum = i;
+		}
+
+		PropValue(Color c)
+		{
+			type = PropValueType::Color;
+			value.Color = c;
+		}
+
+
 	};
 
 	// Selector

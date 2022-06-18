@@ -75,21 +75,22 @@ break; \
 
 namespace NuakeUI
 {
-
-
 	class Node;
 	typedef std::shared_ptr<Node> NodePtr;
-	
+	class Renderer;
 	class CanvasParser;
 	class Node
 	{
 		friend CanvasParser;
+		friend Renderer;
 	protected:
+		float ScrollDelta = 0.0f;
 		std::string ID = "";
 		std::string Type = "node";
+		Node* Parent = nullptr;
+		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
 
 		YGNodeRef mNode;
-		std::vector<NodePtr> Childrens = std::vector<NodePtr>();
 
 		DataModelOperationCollection mDataModelOperations;
 		DataModelPtr mDataModel;
@@ -97,22 +98,35 @@ namespace NuakeUI
 		bool mHasBeenInitialized = false;
 		void InitializeNode();
 	public:
-		std::string GetType() const
-		{
-			return Type;
-		}
-
-		bool HasBeenInitialized() const;
-		float ScrollDelta = 0.0f;
-
-		Vector2 ComputedSize = {0, 0};
-		Vector2 ComputedPosition = {0, 0};
-		Node* Parent = nullptr;
-
+		std::any UserData;
 		NodeState State = NodeState::Idle;
-		NodeStyle ComputedStyle; // The current visual styles.
 
 		std::vector<std::string> Classes = std::vector<std::string>();
+		Vector2 ComputedSize = { 0, 0 };
+		Vector2 ComputedPosition = { 0, 0 };
+		NodeStyle ComputedStyle;
+
+		static NodePtr New(const std::string id, const std::string& value = "");
+		Node(const std::string& id, const std::string& value = "");
+		Node() = default;
+		~Node() = default;
+
+		bool HasBeenInitialized() const;
+
+		virtual void Draw(int z);
+		virtual void UpdateInput(InputManager* manager);
+		virtual void Tick(InputManager* manager);
+		virtual void Calculate();
+
+		virtual void OnMouseHover(Vector2 mousePosition)  {};
+		virtual void OnMouseExit() {};
+		virtual void OnClick(Vector2 mousePosition) {};
+		virtual void OnTick(InputManager* manager) {};
+		virtual void OnClickReleased(Vector2 mousePosition) {};
+		virtual void OnScroll(float scroll) {};
+
+		void ApplyStyleProperties(std::map<StyleProperties, PropValue> properties);
+		
 		void AddClass(const std::string& c) 
 		{ 
 			bool containClass = false;
@@ -155,28 +169,13 @@ namespace NuakeUI
 			return found;
 		}
 
-		// Should be used to creates nodes since it creates a shared_ptr for you.
-		static NodePtr New(const std::string id, const std::string& value = "");
-
-		Node(const std::string& id, const std::string& value = ""); // Do not use.
-		Node() = default;
-		~Node() = default;
-
-	public:
-		std::any UserData;
-
-		virtual void Draw(int z);
-		virtual void UpdateInput(InputManager* manager);
-		virtual void Tick();
-
-		void ApplyStyleProperties(std::map<StyleProperties, PropValue> properties);
-
-		virtual void Calculate();
-
+		// Getter Setter
+		std::string GetType() const;
+		std::string GetID() const;
+		uint32_t GetIndex() const;
+		YGNodeRef GetYogaNode() const;
+		float GetScroll() const;
 		bool IsMouseHover(float x, float y);
-
-		YGNodeRef GetYogaNode() const { return mNode; }
-		std::string GetID() const { return ID; }
 
 		bool HasDataModel() const;
 		DataModelPtr GetDataModel() const;
@@ -206,23 +205,6 @@ namespace NuakeUI
 			}
 
 			assert(false);  // Node not found.
-		}
-
-		uint32_t GetIndex() const
-		{
-			if (!Parent)
-				return -1;
-
-			int i = 0;
-			for (auto& c : Parent->GetChildrens())
-			{
-				if (c->mNode == mNode)
-					return i;
-
-				i++;
-			}
-
-			return 0;
 		}
 
 		template<class T>

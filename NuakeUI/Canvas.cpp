@@ -34,7 +34,7 @@ namespace NuakeUI
 			return;
 		
 		mRootNode->UpdateInput(mInputManager);
-		mRootNode->Tick();
+		mRootNode->Tick(mInputManager);
 
 		mInputManager->ScrollX = 0.f;
 		mInputManager->ScrollY = 0.f;

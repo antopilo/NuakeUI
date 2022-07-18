@@ -1,10 +1,14 @@
 #pragma once
+#include <stack>
+#include <string>
 
 namespace NuakeUI
 {
 	class InputManager
 	{
 	public:
+		static std::stack<std::string> InputStack;
+		
 		static float ScrollX;
 		static float ScrollY;
 
@@ -14,5 +18,14 @@ namespace NuakeUI
 
 		virtual float GetScrollX() = 0;
 		virtual float GetScrollY() = 0;
+
+		virtual bool IsKeyPressed(uint32_t key, uint32_t state) = 0;
+
+		static std::string ConsumeStack()
+		{
+			std::string item = InputStack.top();
+			InputStack.pop();
+			return item;
+		}
 	};
 }

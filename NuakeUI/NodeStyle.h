@@ -1,6 +1,7 @@
 #pragma once
 #include <NuakeRenderer/Math.h>
 #include "Style.h"
+#include <NuakeRenderer/Texture.h>
 
 namespace NuakeUI
 {
@@ -53,5 +54,6 @@ namespace NuakeUI
 		Color FontColor = Color(1, 1, 1, 1);
 		OverflowType Overflow = OverflowType::Show;
 		VisibilityType Visibility = VisibilityType::Show;
+		std::shared_ptr<NuakeRenderer::Texture> BackgroundImage = nullptr;
 	};
 }

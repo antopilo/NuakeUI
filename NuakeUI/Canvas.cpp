@@ -80,7 +80,8 @@ namespace NuakeUI
 			if (s->Type != OperationType::IfClass)
 				continue;
 
-			if (s->Compare(node->GetDataModel()))
+
+			if (auto dataModel = node->GetDataModel(); s->Compare(dataModel))
 			{
 				node->AddClass(s->ClassName);
 			}

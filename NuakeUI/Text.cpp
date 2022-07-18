@@ -20,6 +20,7 @@ namespace NuakeUI
 		SetText(text);
 		float height = ((mFont->LineHeight) / 32.f) * ComputedStyle.FontSize * Lines.size();
 		YGNodeStyleSetHeight(mNode, height);
+		YGNodeStyleSetMinHeight(mNode, height);
 		YGNodeStyleSetMinWidth(mNode, CalculateWidth());
 		YGNodeStyleSetWidthPercent(mNode, 100.f);
 	}
@@ -32,6 +33,9 @@ namespace NuakeUI
 		auto ss = std::stringstream{ text };
 		for (std::string line; std::getline(ss, line, '\n');)
 			Lines.push_back(line);
+
+		if(std::size(Lines) > 0)
+			Calculate();
 	}
 
 	void Text::Draw(int z)

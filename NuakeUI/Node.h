@@ -83,6 +83,9 @@ namespace NuakeUI
 	{
 		friend CanvasParser;
 		friend Renderer;
+	private:
+		static Node* mFocused;
+
 	protected:
 		float ScrollDelta = 0.0f;
 		std::string ID = "";
@@ -97,7 +100,10 @@ namespace NuakeUI
 
 		bool mHasBeenInitialized = false;
 		void InitializeNode();
+
+		
 	public:
+		bool CanGrabFocus = false;
 		std::any UserData;
 		NodeState State = NodeState::Idle;
 
@@ -124,6 +130,10 @@ namespace NuakeUI
 		virtual void OnTick(InputManager* manager) {};
 		virtual void OnClickReleased(Vector2 mousePosition) {};
 		virtual void OnScroll(float scroll) {};
+
+		bool HasFocus() const;
+		void GrabFocus();
+		void ReleaseFocus();
 
 		void ApplyStyleProperties(std::map<StyleProperties, PropValue> properties);
 		

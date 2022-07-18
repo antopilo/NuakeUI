@@ -107,6 +107,13 @@ namespace NuakeUI
 		transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, z));
 		transform = glm::scale(transform, Vector3(width, height, 1.0f));
 
+		bool hasBackgroundImage = false;
+		if (node->ComputedStyle.BackgroundImage)
+		{
+			hasBackgroundImage = true;
+			node->ComputedStyle.BackgroundImage->Bind(0);
+		}
+
 		mShader->Bind();
 		mShader->SetUniforms({
 			{ "u_Model",		transform },
@@ -116,7 +123,10 @@ namespace NuakeUI
 			{ "u_Border",		node->ComputedStyle.BorderSize },
 			{ "u_BorderRadius",		node->ComputedStyle.BorderRadius },
 			{ "u_BorderColor",	node->ComputedStyle.BorderColor },
+			{ "u_BackgroundImage", 0},
+			{ "u_HasBackgroundImage", hasBackgroundImage ? 1.f : 0.f}
 		});
+
 
 		bool hideOverflow = node->Parent != nullptr && node->Parent->ComputedStyle.Overflow == OverflowType::Hidden;
 		if (hideOverflow)

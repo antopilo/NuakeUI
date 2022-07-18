@@ -4,7 +4,6 @@ Node.h Node.cpp Style.h
 Renderer.h Renderer.cpp 
 FileSystem.h FileSystem.cpp 
 Button.h Button.cpp 
-Checkbox.h Checkbox.cpp 
 InputManager.h Text.h Text.cpp 
 StyleSheet.h Font.h Font.cpp
 FontLoader.h 

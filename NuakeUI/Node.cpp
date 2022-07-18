@@ -75,14 +75,17 @@ namespace NuakeUI
 
 	DataModelPtr Node::GetDataModel() const
 	{
-		// Travel upward to find model
 		if (HasDataModel())
+		{
 			return mDataModel;
+		}
 
-		else if (Parent != nullptr)
+		if (Parent != nullptr)
+		{
 			return Parent->GetDataModel();
-		else
-			return nullptr;
+		}
+
+		return nullptr;
 	}
 
 	void Node::SetDataModel(const DataModelPtr& dataModel)
@@ -109,9 +112,10 @@ namespace NuakeUI
 	{
 		OnTick(inputManager);
 
-		// Update the state.
 		for (auto& c : Childrens)
+		{
 			c->Tick(inputManager);
+		}
 	}
 
 	void Node::UpdateInput(InputManager* inputManager)
@@ -125,13 +129,13 @@ namespace NuakeUI
 		bool isMouseDown = inputManager->IsMouseInputDown();
 		if (State == NodeState::Clicked && !isMouseDown)
 		{
-			State == NodeState::Hover;
+			State = NodeState::Hover;
 			OnClickReleased(Vector2(mx, my));
 		}
 
-		if (!isHover)
+		if (!isMouseDown)
 		{
-			if (!isMouseDown)
+			if (!isHover)
 			{
 				if (State != NodeState::Idle)
 				{
@@ -140,23 +144,32 @@ namespace NuakeUI
 
 				State = NodeState::Idle;
 			}
-		}
-		else
-		{
-			if (State != NodeState::Hover)
+			else
 			{
-				OnMouseHover(Vector2(mx, my));
+				if (State != NodeState::Hover)
+				{
+					OnMouseHover(Vector2(mx, my));
+				}
+
+				State = NodeState::Hover;
 			}
-
-			State = NodeState::Hover;
 		}
-			
-
-		if (isHover && isMouseDown)
+		
+		if (isHover && isMouseDown && State != NodeState::Clicked)
 		{
 			OnClick(Vector2(mx, my));
-
 			State = NodeState::Clicked;
+
+			if (CanGrabFocus)
+			{
+				GrabFocus();
+			}
+		}
+
+		if (!isHover && isMouseDown && State != NodeState::Clicked)
+		{
+			if (HasFocus())
+				ReleaseFocus();
 		}
 
 		// Calculate Max Scroll delta
@@ -165,7 +178,9 @@ namespace NuakeUI
 		{
 			float childrenBottom = c->ComputedPosition.y + ScrollDelta + c->ComputedSize.y;
 			if (childrenBottom > totalHeight)
+			{
 				totalHeight = childrenBottom;
+			}
 		}
 		
 		float maxScrollDelta = 0.f;
@@ -300,6 +315,22 @@ namespace NuakeUI
 		Childrens.push_back(child);
 		uint32_t index = (uint32_t)Childrens.size() - 1;
 		YGNodeInsertChild(this->mNode, child->GetYogaNode(), index);
+	}
+
+	Node* Node::mFocused = nullptr;
+	void Node::GrabFocus()
+	{
+		mFocused = this;
+	}
+
+	bool Node::HasFocus() const
+	{
+		return mFocused == this;
+	}
+
+	void Node::ReleaseFocus()
+	{
+		mFocused = nullptr;
 	}
 
 	void Node::ApplyStyleProperties(std::map<StyleProperties, PropValue> properties)

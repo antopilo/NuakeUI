@@ -124,12 +124,12 @@ namespace NuakeUI
 		virtual void Tick(InputManager* manager);
 		virtual void Calculate();
 
-		virtual void OnMouseHover(Vector2 mousePosition)  {};
-		virtual void OnMouseExit() {};
-		virtual void OnClick(Vector2 mousePosition) {};
+		virtual void OnMouseHover(InputManager* inputManager)  {};
+		virtual void OnMouseExit(InputManager* inputManager) {};
+		virtual void OnClick(InputManager* inputManager) {};
 		virtual void OnTick(InputManager* manager) {};
-		virtual void OnClickReleased(Vector2 mousePosition) {};
-		virtual void OnScroll(float scroll) {};
+		virtual void OnClickReleased(InputManager* inputManager) {};
+		virtual void OnScroll(InputManager* inputManager) {};
 
 		bool HasFocus() const;
 		void GrabFocus();

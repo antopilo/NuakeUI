@@ -17,7 +17,7 @@ namespace NuakeUI
 
 	bool DataModelOperation::Compare(DataModelPtr object)
 	{
-		if (!object->HasData(Name))
+		if (!object || !object->HasData(Name))
 		{
 			std::cout << "DataModel has no data named " << Name << std::endl;
 			return false;

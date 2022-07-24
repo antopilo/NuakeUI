@@ -130,7 +130,7 @@ namespace NuakeUI
 		if (State == NodeState::Clicked && !isMouseDown)
 		{
 			State = NodeState::Hover;
-			OnClickReleased(Vector2(mx, my));
+			OnClickReleased(inputManager);
 		}
 
 		if (!isMouseDown)
@@ -139,7 +139,7 @@ namespace NuakeUI
 			{
 				if (State != NodeState::Idle)
 				{
-					OnMouseExit();
+					OnMouseExit(inputManager);
 				}
 
 				State = NodeState::Idle;
@@ -148,7 +148,7 @@ namespace NuakeUI
 			{
 				if (State != NodeState::Hover)
 				{
-					OnMouseHover(Vector2(mx, my));
+					OnMouseHover(inputManager);
 				}
 
 				State = NodeState::Hover;
@@ -157,7 +157,7 @@ namespace NuakeUI
 		
 		if (isHover && isMouseDown && State != NodeState::Clicked)
 		{
-			OnClick(Vector2(mx, my));
+			OnClick(inputManager);
 			State = NodeState::Clicked;
 
 			if (CanGrabFocus)
@@ -193,7 +193,7 @@ namespace NuakeUI
 		float scroll = inputManager->GetScrollY();
 		if (std::abs(scroll) > 0.f && ComputedStyle.Overflow == OverflowType::Scroll && isHover)
 		{
-			OnScroll(scroll);
+			OnScroll(inputManager);
 
 			const float scrollForce = 40.f;
 			const float scrollAmount = scroll * -scrollForce;

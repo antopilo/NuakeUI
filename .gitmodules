@@ -7,3 +7,6 @@
 [submodule "Dependencies/msdf-atlas-gen"]
 	path = Dependencies/msdf-atlas-gen
 	url = https://github.com/antopilo/msdf-atlas-gen.git
+[submodule "Dependencies/nanosvg"]
+	path = Dependencies/nanosvg
+	url = https://github.com/memononen/nanosvg.git

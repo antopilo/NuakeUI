@@ -1,11 +1,10 @@
 #pragma once
-#include "Canvas.h"
-#include "Text.h"
-#include "StyleSheet.h"
+#include "Nodes/Canvas.h"
+#include "Nodes/Text.h"
+#include "Styles/StyleSheet.h"
 
 #include <memory>
 
-#include <imgui.h>
 #include <Dependencies/NuakeRenderer/NuakeRenderer/NuakeRenderer.h>
 
 namespace NuakeUI

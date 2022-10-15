@@ -3,8 +3,8 @@
 #include <NuakeRenderer/NuakeRenderer.h>
 #include <NuakeRenderer/VertexBufferLayout.h>
 
-#include "Font.h"
-#include "FontManager.h"
+#include "Font/Font.h"
+#include "Font/FontManager.h"
 
 #include "FileSystem.h"
 

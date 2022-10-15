@@ -14,3 +14,4 @@ Debug/NuakeUI.pdb
 *.filters
 *.vcxproj
 NuakeUI/Release
+NuakeUI/Debug

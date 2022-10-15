@@ -3,9 +3,9 @@
 #include <NuakeRenderer/VertexBuffer.h>
 #include <NuakeRenderer/VertexArray.h>
 
-#include "Node.h"
-#include "Font.h"
-#include "Text.h"
+#include "Nodes/Node.h"
+#include "Nodes/Text.h"
+#include "Font/Font.h"
 
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
 

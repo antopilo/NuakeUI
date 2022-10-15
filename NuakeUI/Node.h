@@ -110,6 +110,7 @@ namespace NuakeUI
 		std::vector<std::string> Classes = std::vector<std::string>();
 		Vector2 ComputedSize = { 0, 0 };
 		Vector2 ComputedPosition = { 0, 0 };
+		int32_t ComputedZIndex = 0;
 		NodeStyle ComputedStyle;
 
 		static NodePtr New(const std::string id, const std::string& value = "");

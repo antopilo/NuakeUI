@@ -32,6 +32,7 @@ namespace NuakeUI
 
 		CanvasPtr Parse(const std::string& file);
 	private:
+		void ScanFragment(tinyxml2::XMLElement* e, NodePtr node);
 		void WriteValueFromString(std::variant<int, float, bool, std::string, char>& var, const std::string& str);
 		void IterateOverElement(tinyxml2::XMLElement* e, NodePtr node);
 		NodePtr CreateNodeFromXML(tinyxml2::XMLElement* xml, const std::string& id = "Node");

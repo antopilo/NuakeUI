@@ -60,7 +60,7 @@ namespace NuakeUI
 	void Renderer::SetViewportSize(const Vector2& size)
 	{
 		mSize = size;
-		mView = glm::ortho(0.f, size.x, size.y, 0.f, -1000.f, 10000.f);
+		mView = glm::ortho(0.f, size.x, size.y, 0.f, -100.f, 100.0f);
 	}
 
 	void Renderer::BeginDraw()
@@ -72,8 +72,8 @@ namespace NuakeUI
 
 	void Renderer::DrawNode(std::shared_ptr<Node> node, int z)
 	{
-		Matrix4 transform = Matrix4(1.f);
-
+		glEnable(GL_DEPTH_TEST);
+		
 		float parentScroll = 0.f;
 		float parentPaddingRight = 0.f;
 		if (node->Parent)
@@ -104,6 +104,7 @@ namespace NuakeUI
 		node->ComputedSize = Vector2(width, height);
 		node->ComputedPosition = Vector2(left + parentLeft, top + parentTop);
 
+		Matrix4 transform = Matrix4(1.f);
 		transform = glm::translate(transform, Vector3(left + parentLeft, top + parentTop, z));
 		transform = glm::scale(transform, Vector3(width, height, 1.0f));
 
@@ -153,19 +154,19 @@ namespace NuakeUI
 
 	void Renderer::DrawString(const std::string& string, NodeStyle& nodeStyle, std::shared_ptr<Font> font, Vector3 position)
 	{
-		glDisable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 		const float fontSize = nodeStyle.FontSize / 64.f;
-
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
 		mSDFShader->Bind();
 		font->mAtlas->Bind(5);
 		mSDFShader->SetUniforms({
-			{ "u_View", mView},
-			{"u_Atlas", 5},
-			{"u_FontColor", nodeStyle.FontColor},
+			{ "u_View", mView },
+			{ "u_Atlas", 5 },
+			{ "u_Scale", 1.0f},
+			{ "u_SDF_BorderSize", 0.0f},
+			{ "u_FontColor", nodeStyle.FontColor },
 			{ "u_PxRange",   fontSize },
+			{ "u_SDF_BorderSize", {1.0, 1.0}}
 		});
 		
 		mVertexArray->Bind();
@@ -178,14 +179,14 @@ namespace NuakeUI
 			// Move the cursor
 			Matrix4 model = Matrix4(1.f);
 			model = glm::translate(model, position);
-			model = glm::translate(model, Vector3(advance * fontSize, (-(letter.PlaneBounds.top) + (font->LineHeight)) * fontSize, 0.f));
+			model = glm::translate(model, Vector3(advance * fontSize, (-(letter.PlaneBounds.top) + (font->LineHeight)) * fontSize, 0));
 
 			advance += (letter.Advance);
 
 			// Scaling of the quad
 			float scaleX = (float)(letter.PlaneBounds.right - letter.PlaneBounds.left);
 			float scaleY = (float)(letter.PlaneBounds.top - letter.PlaneBounds.bottom);
-			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 0.f));
+			model = glm::scale(model, Vector3(scaleX * fontSize, scaleY * fontSize, 1.f));
 
 			// Set Uniforms
 			mSDFShader->SetUniforms({
@@ -194,8 +195,10 @@ namespace NuakeUI
 				{ "u_TextureScale", Vector2(letter.AtlasBounds.Size.x, letter.AtlasBounds.Size.y) },
 			});
 
+
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 		}
+
 
 		mVertexArray->Unbind();
 	}

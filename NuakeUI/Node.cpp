@@ -80,6 +80,7 @@ namespace NuakeUI
 			return mDataModel;
 		}
 
+		// Ask parent if they have a data model
 		if (Parent != nullptr)
 		{
 			return Parent->GetDataModel();
@@ -121,9 +122,9 @@ namespace NuakeUI
 	void Node::UpdateInput(InputManager* inputManager)
 	{
 		inputManager = inputManager;
+
 		float mx = inputManager->GetMouseX();
 		float my = inputManager->GetMouseY();
-
 		bool isHover = IsMouseHover(mx, my);
 
 		bool isMouseDown = inputManager->IsMouseInputDown();
@@ -155,6 +156,7 @@ namespace NuakeUI
 			}
 		}
 		
+		// Grab focus
 		if (isHover && isMouseDown && State != NodeState::Clicked)
 		{
 			OnClick(inputManager);
@@ -166,15 +168,16 @@ namespace NuakeUI
 			}
 		}
 
+		// Release focus
 		if (!isHover && isMouseDown && State != NodeState::Clicked)
 		{
 			if (HasFocus())
 				ReleaseFocus();
 		}
-
-		// Calculate Max Scroll delta
+		
+		// Calculate total absolute height of all the childrens
 		float totalHeight = 0.0f;
-		for (auto& c : Childrens)
+		for (const auto& c : Childrens)
 		{
 			float childrenBottom = c->ComputedPosition.y + ScrollDelta + c->ComputedSize.y;
 			if (childrenBottom > totalHeight)
@@ -183,6 +186,7 @@ namespace NuakeUI
 			}
 		}
 		
+		// Calculate Max Scroll delta
 		float maxScrollDelta = 0.f;
 		if (totalHeight > ComputedSize.y)
 		{
@@ -191,13 +195,19 @@ namespace NuakeUI
 
 		// Scroll the parent and keep the remainder.
 		float scroll = inputManager->GetScrollY();
-		if (std::abs(scroll) > 0.f && ComputedStyle.Overflow == OverflowType::Scroll && isHover)
+
+		bool isScrolled = std::abs(scroll) > 0.0f;
+		bool canScroll = ComputedStyle.Overflow == OverflowType::Scroll;
+		if (isScrolled && canScroll && isHover)
 		{
+			// Call node event
 			OnScroll(inputManager);
 
-			const float scrollForce = 40.f;
-			const float scrollAmount = scroll * -scrollForce;
-			float newDelta = ScrollDelta + scrollAmount;
+			const float SCROLL_FORCE = 40.f;
+			const float scrollAmount = scroll * -SCROLL_FORCE;
+			const float newDelta = ScrollDelta + scrollAmount;
+
+			// This is what remains of the scrolling if we hit the limits to resolve to parent.
 			float remainder = 0.0f;
 			if (scrollAmount > .0f)
 			{
@@ -230,15 +240,20 @@ namespace NuakeUI
 		}
 
 		if (ScrollDelta > maxScrollDelta)
+		{
 			ScrollDelta = maxScrollDelta;
+		}
 
 		for (auto& c : Childrens)
+		{
 			c->UpdateInput(inputManager);
+		}
 	}
 
 	void Node::Draw(int z)
 	{
 		z++;
+		ComputedZIndex = ComputedStyle.ZIndex + z;
 		if (ComputedStyle.Visibility == VisibilityType::Hidden)
 		{
 			return;
@@ -265,15 +280,17 @@ namespace NuakeUI
 				continue;
 			}
 
-			Renderer::Get().DrawNode(c, z);
-			c->Draw(z);
+			Renderer::Get().DrawNode(c, ComputedZIndex);
+			c->Draw(ComputedZIndex);
 		}
 	}
 
 	void Node::Calculate()
 	{
 		for (auto& c : Childrens)
+		{
 			c->Calculate();
+		}
 	}
 
 	bool Node::IsMouseHover(float x, float y)
@@ -356,6 +373,18 @@ namespace NuakeUI
 				LengthProp(PaddingTop)
 				LengthProp(PaddingRight)
 				LengthProp(PaddingBottom)
+				case StyleProperties::Top:
+					ComputedStyle.Top = value.value.Number;
+					break;
+				case StyleProperties::Bottom:
+					ComputedStyle.Bottom = value.value.Number;
+					break;
+				case StyleProperties::Left:
+					ComputedStyle.Left = value.value.Number;
+					break;
+				case StyleProperties::Right:
+					ComputedStyle.Right = value.value.Number;
+				break;
 				EnumProp(Position)
 				EnumProp(AlignItems)
 				EnumPropEx(SelfAlign, AlignItemsType)
@@ -403,11 +432,37 @@ namespace NuakeUI
 				case StyleProperties::Visibility:
 					ComputedStyle.Visibility = (VisibilityType)value.value.Enum;
 					break;
+				case StyleProperties::ZIndex:
+					ComputedStyle.ZIndex = value.value.Number;
+					break;
 			}
 		}
 
 		SetLength(Width)
 		SetLength(Height)
+		
+		if (ComputedStyle.Position == PositionType::Absolute)
+		{
+			if (ComputedStyle.Top != -1)
+			{
+				YGNodeStyleSetPosition(mNode, YGEdgeTop, ComputedStyle.Top);
+			}
+			if (ComputedStyle.Bottom != -1)
+			{
+				YGNodeStyleSetPosition(mNode, YGEdgeBottom, ComputedStyle.Bottom);
+			}
+			if (ComputedStyle.Left != -1)
+			{
+				YGNodeStyleSetPosition(mNode, YGEdgeLeft, ComputedStyle.Left);
+			}
+			if (ComputedStyle.Right != -1)
+			{
+				YGNodeStyleSetPosition(mNode, YGEdgeRight, ComputedStyle.Right);
+			}
+		}
+
+		SetLengthNoAuto(MaxWidth)
+		SetLengthNoAuto(MaxHeight)
 		SetLengthNoAuto(MinWidth)
 		SetLengthNoAuto(MinHeight)
 		SetLengthNoAuto(MaxWidth)
@@ -449,6 +504,28 @@ namespace NuakeUI
 
 		if (ComputedStyle.AlignItems == AlignItemsType::FlexStart)
 			YGNodeStyleSetAlignItems(mNode, YGAlignFlexStart);
+		else if (ComputedStyle.AlignItems == AlignItemsType::Center)
+			YGNodeStyleSetAlignItems(mNode, YGAlignCenter);
+		else if (ComputedStyle.AlignItems == AlignItemsType::FlexEnd)
+			YGNodeStyleSetAlignItems(mNode, YGAlignFlexEnd);
+		else if (ComputedStyle.AlignItems == AlignItemsType::SpaceAround)
+			YGNodeStyleSetAlignItems(mNode, YGAlignSpaceAround);
+		else if (ComputedStyle.AlignItems == AlignItemsType::SpaceBetween)
+			YGNodeStyleSetAlignItems(mNode, YGAlignSpaceBetween);
+		else if (ComputedStyle.AlignItems == AlignItemsType::Stretch)
+			YGNodeStyleSetAlignItems(mNode, YGAlignStretch);
+		else if (ComputedStyle.AlignItems == AlignItemsType::Baseline)
+			YGNodeStyleSetAlignItems(mNode, YGAlignBaseline);
+
+		if (ComputedStyle.FlexDirection == FlexDirectionType::Row)
+			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionRow);
+		if (ComputedStyle.FlexDirection == FlexDirectionType::RowReversed)
+			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionRowReverse);
+		if (ComputedStyle.FlexDirection == FlexDirectionType::Column)
+			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionColumn);
+		if (ComputedStyle.FlexDirection == FlexDirectionType::ColumnReversed)
+			YGNodeStyleSetFlexDirection(mNode, YGFlexDirectionColumnReverse);
+
 		else if (ComputedStyle.AlignItems == AlignItemsType::Center)
 			YGNodeStyleSetAlignItems(mNode, YGAlignCenter);
 		else if (ComputedStyle.AlignItems == AlignItemsType::FlexEnd)

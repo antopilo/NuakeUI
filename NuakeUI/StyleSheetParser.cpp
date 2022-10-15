@@ -33,30 +33,82 @@ namespace NuakeUI
 		}
 		else
 		{
-			for (uint32_t i = 0; i < data->stylesheet->rules.length; i++)
-			{
-				KatanaRule* rule = (KatanaRule*)data->stylesheet->rules.data[i];
-
-				auto ruleType = rule->type;
-				switch (ruleType)
-				{
-				case KatanaRuleImport:
-					ParseImportRule(rule);
-					break;
-				case KatanaRuleStyle:
-					ParseStyleRule(rule, styleSheet);
-					break;
-				}
-			}
+			ParseRules(data->stylesheet, styleSheet);
 		}
 		
+		_visitedFiles.clear();
+
 		return styleSheet;
 	}
 
-	void StyleSheetParser::ParseImportRule(KatanaRule* rule)
+	bool StyleSheetParser::FileAlreadyVisited(const std::string& path)
 	{
-		auto importRule = reinterpret_cast<KatanaImportRule*>(rule);
-		std::string path = importRule->href;
+		return std::find(_visitedFiles.begin(), _visitedFiles.end(), path) != _visitedFiles.end();
+	}
+
+	void StyleSheetParser::ParseRules(KatanaStylesheet* katanaStylesheet, StyleSheetPtr stylesheet)
+	{
+		// Import files first
+		auto imports = katanaStylesheet->imports;
+		for (uint32_t i = 0; i < imports.length; i++)
+		{
+			KatanaImportRule* importRule = static_cast<KatanaImportRule*>(imports.data[i]);
+			ParseImportRule(importRule, stylesheet);
+		}
+
+		// Parse generic rules
+		auto rules = katanaStylesheet->rules;
+		for (uint32_t i = 0; i < rules.length; i++)
+		{
+			KatanaRule* rule = (KatanaRule*)rules.data[i];
+
+			auto ruleType = rule->type;
+			switch (ruleType)
+			{
+			case KatanaRuleStyle: // Not sure if needed.
+				ParseStyleRule(rule, stylesheet);
+				break;
+			}
+		}
+	}
+
+	void StyleSheetParser::ParseImportRule(KatanaImportRule* rule, StyleSheetPtr styleSheet)
+	{
+		std::string path = rule->href;
+
+		if (FileAlreadyVisited(path))
+		{
+			std::cout << "Cyclic file import detected! " << "File is: " << path << std::endl;
+			return;
+		}
+
+		_visitedFiles.push_back(path);
+
+		if (!FileSystem::FileExists(path))
+		{
+			std::cout << "CSS Import rule error: Cannot find file: " << path << std::endl;
+			return;
+		}
+
+		std::string fileContent = FileSystem::ReadFile(path);
+		auto data = katana_parse(fileContent.c_str(), fileContent.length(), KatanaParserModeStylesheet);
+
+		if (data->errors.length > 0)
+		{
+			KatanaArray errors = data->errors;
+			for (uint32_t i = 0; i < errors.length; i++)
+			{
+				KatanaError* error = (KatanaError*)errors.data[i];
+				std::cout << "Failed to parse css file \"" + path + "\"." << std::endl;
+				std::cout << "Error is " << error->message << std::endl;
+				std::cout << "ERROR at line " + std::to_string(error->first_line) +
+					" : " + std::to_string(error->first_column) << std::endl;
+			}
+
+			return;
+		}
+
+		ParseRules(data->stylesheet, styleSheet);
 	}
 
 	StyleProperties GetPropFromString(const std::string& prop)
@@ -96,12 +148,15 @@ namespace NuakeUI
 		else if (prop == "overflow")			return StyleProperties::Overflow;
 		else if (prop == "font-size")			return StyleProperties::FontSize;
 		else if (prop == "visibility")			return StyleProperties::Visibility;
-
+		else if (prop == "z-index")				return StyleProperties::ZIndex;
+		else if (prop == "top")					return StyleProperties::Top;
+		else if (prop == "bottom")				return StyleProperties::Bottom;
+		else if (prop == "left")				return StyleProperties::Left;
+		else if (prop == "right")				return StyleProperties::Right;
 		return StyleProperties::None;
-
 	}
 
-	void StyleSheetParser::ParseStyleRule(KatanaRule* rule, std::shared_ptr<StyleSheet> styleSheet)
+	void StyleSheetParser::ParseStyleRule(KatanaRule* rule, StyleSheetPtr styleSheet)
 	{
 		auto styleRule = reinterpret_cast<KatanaStyleRule*>(rule);
 		std::string styleName = rule->name;
@@ -169,6 +224,7 @@ namespace NuakeUI
 
 					switch (value->unit)
 					{
+
 						case KatanaValueUnit::KATANA_VALUE_PERCENTAGE:
 						case KatanaValueUnit::KATANA_VALUE_PX:
 						{
@@ -189,13 +245,17 @@ namespace NuakeUI
 							std::string valueStr = value->string;
 						}
 						break;
+						case KatanaValueUnit::KATANA_VALUE_NUMBER:
+							propValue.value.Number = (int)value->fValue;
+							break;
 						case KatanaValueUnit::KATANA_VALUE_IDENT:
 						{
 							std::string valueStr = value->string;
 							if (propType == StyleProperties::Position)
 							{
 								PositionType positionType = PositionType::Relative;
-								if (valueStr == "absolute")	PositionType::Absolute;
+								if (valueStr == "absolute")	
+									propValue.value.Enum = (int)PositionType::Absolute;
 							}
 							if (propType == StyleProperties::AlignContent)
 							{

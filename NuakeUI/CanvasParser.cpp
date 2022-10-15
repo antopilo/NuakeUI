@@ -184,6 +184,34 @@ namespace NuakeUI
 		}
 	}
 
+	void CanvasParser::ScanFragment(tinyxml2::XMLElement* e, NodePtr node)
+	{
+		// We have a <fragment> with a src path.
+		const std::string nodeType = e->Value();
+		if (nodeType == "fragment")
+		{
+			if (auto srcAttr = e->FindAttribute("src"); srcAttr)
+			{
+				std::string fragmentPath = srcAttr->Value();
+				if (FileSystem::FileExists(fragmentPath))
+				{
+					tinyxml2::XMLDocument doc;
+					if (tinyxml2::XMLError error = doc.LoadFile(fragmentPath.c_str()))
+					{
+						doc.PrintError();
+					}
+
+					auto firstNode = doc.FirstChildElement();
+					IterateOverElement(firstNode, node);
+				}
+				else
+				{
+					std::cout << "Fragment src attributes error. Cant find file at: " << fragmentPath << std::endl;
+				}
+			}
+		}
+	}
+
 	void CanvasParser::IterateOverElement(tinyxml2::XMLElement* e, NodePtr node)
 	{
 		tinyxml2::XMLElement* current = e;
@@ -197,6 +225,9 @@ namespace NuakeUI
 			{
 				id = idAttribute->Value();
 			}
+
+			ScanFragment(current, node);
+			
 
 			NodePtr newNode = CreateNodeFromXML(current, id);
 			if (newNode)
@@ -222,9 +253,7 @@ namespace NuakeUI
 		tinyxml2::XMLDocument doc;
 		if (tinyxml2::XMLError error = doc.LoadFile(path.c_str()))
 		{
-			std::cout << "Error loading UI file: " << path << "\n" <<
-				"Error code is: " << error << std::endl;
-
+			doc.PrintError();
 			return nullptr;
 		}
 

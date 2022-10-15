@@ -12,13 +12,14 @@ namespace NuakeUI
 {
 	enum class StyleProperties {
 		None, Width, Height, MinWidth, MinHeight, MaxWidth, MaxHeight,
+		Top, Bottom, Left, Right,
 		PaddingLeft, PaddingTop, PaddingRight, PaddingBottom,
-		MarginLeft, MarginTop, MarginRight, MarginBottom, 
+		MarginLeft, MarginTop, MarginRight, MarginBottom,
 		Position, AlignItems, SelfAlign,
 		AspectRatio, FlexDirection, FlexWrap, FlexBasis, FlexGrow, FlexShrink,
-		JustifyContent, AlignContent, LayoutDirection, 
+		JustifyContent, AlignContent, LayoutDirection,
 		BorderSize, BorderRadius, BorderColor,
-		BackgroundColor, TextAlign, Color, Overflow, FontSize, Visibility
+		BackgroundColor, TextAlign, Color, Overflow, FontSize, Visibility, ZIndex
 	};
 	enum class PositionType { Relative, Absolute };
 	enum class AlignItemsType { Auto, FlexStart, Center, FlexEnd, Stretch, Baseline, SpaceBetween, SpaceAround };

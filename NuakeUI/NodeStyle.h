@@ -55,5 +55,10 @@ namespace NuakeUI
 		OverflowType Overflow = OverflowType::Show;
 		VisibilityType Visibility = VisibilityType::Show;
 		std::shared_ptr<NuakeRenderer::Texture> BackgroundImage = nullptr;
+		int32_t ZIndex = 0;
+		float Top = -1;
+		float Bottom = -1;
+		float Right = -1;
+		float Left = -1;
 	};
 }

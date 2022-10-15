@@ -11,3 +11,6 @@ NuakeUI.vcxproj.filters
 NuakeUI.vcxproj.user
 Debug/NuakeUI.lib
 Debug/NuakeUI.pdb
+*.filters
+*.vcxproj
+NuakeUI/Release

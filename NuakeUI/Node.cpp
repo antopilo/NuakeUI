@@ -172,7 +172,9 @@ namespace NuakeUI
 		if (!isHover && isMouseDown && State != NodeState::Clicked)
 		{
 			if (HasFocus())
+			{
 				ReleaseFocus();
+			}
 		}
 		
 		// Calculate total absolute height of all the childrens

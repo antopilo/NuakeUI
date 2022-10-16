@@ -59,6 +59,10 @@ namespace NuakeUI
 
 			// Create Texture from bitmap
 			//msdf_atlas::exportJSON(fonts.data(), fonts.size(), config.emSize, config.pxRange, config.width, config.height, config.imageType, config.yDirection, "yayayayya.json", config.kerning);
+			using namespace NuakeRenderer;
+			TextureFlags flags{};
+			flags.magFilter = SamplerFilter::NEAREST;
+			flags.minFilter = SamplerFilter::NEAREST;
 			font->mAtlas = std::make_shared<NuakeRenderer::Texture>(NuakeRenderer::TextureFlags(), Vector2(config.width, config.height), (void*)bitmap.pixels);
 
 			// Create Char structure

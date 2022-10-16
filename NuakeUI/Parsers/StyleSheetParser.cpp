@@ -11,12 +11,13 @@ namespace NuakeUI
 	std::shared_ptr<StyleSheet> StyleSheetParser::Parse(const std::string& path)
 	{
 		assert(FileSystem::FileExists(path));
+
+		_parsingPath = path;
+
 		std::string fileContent = FileSystem::ReadFile(path);
-
-		auto styleSheet = StyleSheet::New();
-
 		auto data = katana_parse(fileContent.c_str(), fileContent.length(), KatanaParserModeStylesheet);
 
+		auto styleSheet = StyleSheet::New();
 		// Print out errors.
 		if (data->errors.length > 0)
 		{
@@ -153,6 +154,7 @@ namespace NuakeUI
 		else if (prop == "bottom")				return StyleProperties::Bottom;
 		else if (prop == "left")				return StyleProperties::Left;
 		else if (prop == "right")				return StyleProperties::Right;
+		else if (prop == "background-image")	return StyleProperties::BackgroundImage;
 		return StyleProperties::None;
 	}
 
@@ -224,7 +226,17 @@ namespace NuakeUI
 
 					switch (value->unit)
 					{
-
+					case KatanaValueUnit::KATANA_VALUE_STRING:
+						{
+							std::string stringValue = value->string;
+							if (propType == StyleProperties::BackgroundImage)
+							{
+								stringValue = _parsingPath + "/../" + stringValue;
+							}
+							propValue.string = stringValue;
+							propValue.type = PropValueType::String;
+						}
+						break;
 						case KatanaValueUnit::KATANA_VALUE_PERCENTAGE:
 						case KatanaValueUnit::KATANA_VALUE_PX:
 						{

@@ -17,7 +17,7 @@ include_directories(./Dependencies/msdf-atlas-gen)
 include_directories(./Dependencies/msdf-atlas-gen/msdf-atlas-gen)
 
 add_subdirectory(./Dependencies/nanosvg)
-include_directories(./Dependencies/nanosvg/)
+include_directories(./Dependencies/nanosvg/src) 
 
 
 

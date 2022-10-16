@@ -9,6 +9,7 @@
 #include "StyleSheetParser.h"
 #include "../StringHelper.h"
 
+#include <iostream>
 #include <charconv>
 
 namespace NuakeUI

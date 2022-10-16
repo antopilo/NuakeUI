@@ -102,7 +102,6 @@ namespace NuakeUI
 
 		bool mHasBeenInitialized = false;
 		void InitializeNode();
-
 		
 	public:
 		bool CanGrabFocus = false;

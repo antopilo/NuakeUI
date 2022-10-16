@@ -12,7 +12,7 @@ namespace NuakeUI
 		Label(label)
 	{
 		ID = name;
-		InsertChild(Text::New(ID + "lbl", Label));
+		//InsertChild(Text::New(ID + "lbl", Label));
 	}
 
 	void Button::UpdateInput(InputManager* inputManager)

@@ -23,6 +23,7 @@ namespace NuakeUI
 		std::shared_ptr<StyleSheet> Parse(const std::string& path);
 
 	private:
+		std::string _parsingPath;
 		std::vector<std::string> _visitedFiles;
 
 		bool FileAlreadyVisited(const std::string& path);

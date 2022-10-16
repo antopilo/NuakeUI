@@ -67,5 +67,8 @@ target_link_libraries(NuakeUI PUBLIC
 	NuakeRenderer 
 	yogacore 
 	msdf-atlas-gen 
+	nanosvg
 	nanosvgrast
 )
+
+target_include_directories(NuakeUI PUBLIC ../Dependencies/nanosvg/src)

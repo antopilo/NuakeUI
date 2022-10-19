@@ -193,7 +193,7 @@ namespace NuakeUI
 		{
 			if (auto srcAttr = e->FindAttribute("src"); srcAttr)
 			{
-				std::string fragmentPath = srcAttr->Value();
+				std::string fragmentPath =  _parsingPath + "/../" + srcAttr->Value();
 				if (FileSystem::FileExists(fragmentPath))
 				{
 					tinyxml2::XMLDocument doc;
@@ -251,6 +251,8 @@ namespace NuakeUI
 
 	CanvasPtr CanvasParser::Parse(const std::string& path)
 	{
+		_parsingPath = path;
+
 		tinyxml2::XMLDocument doc;
 		if (tinyxml2::XMLError error = doc.LoadFile(path.c_str()))
 		{

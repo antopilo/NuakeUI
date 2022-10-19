@@ -16,6 +16,7 @@ namespace NuakeUI
 	{
 	private:
 		std::map<std::string, refNew> NodeTypes;
+		std::string _parsingPath;
 
 	public:
 		CanvasParser();

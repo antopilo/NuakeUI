@@ -7,6 +7,7 @@ set(HEADERS
 	Nodes/Button.h 
 	InputManager.h 
 	Nodes/Text.h  
+	Nodes/TextInput.h  
 	Styles/StyleSheet.h 
 	Font/Font.h 
 	Font/FontLoader.h 
@@ -22,7 +23,8 @@ set(HEADERS
 	DataBinding/DataBindOperation.h 
 	DataBinding/DataModelOperations.h 
 	NuakeUI.h 
-	Nodes/NodeStyle.h
+	Nodes/NodeStyle.h 
+	IController.h 
 )
 
 set(SOURCES 
@@ -41,6 +43,7 @@ set(SOURCES
 	InputManager.cpp 
 	DataBinding/DataBindObject.cpp  
 	DataBinding/DataModelOperations.cpp 
+	StringHelper.cpp 
 )
 
 set(VENDOR_SOURCES 

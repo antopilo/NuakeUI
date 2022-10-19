@@ -19,7 +19,7 @@ namespace NuakeUI
 		virtual float GetScrollX() = 0;
 		virtual float GetScrollY() = 0;
 
-		virtual bool IsKeyPressed(uint32_t key, uint32_t state) = 0;
+		virtual bool IsKeyPressed(uint32_t key) = 0;
 
 		static std::string ConsumeStack()
 		{

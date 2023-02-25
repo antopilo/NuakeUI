@@ -66,8 +66,29 @@ namespace NuakeUI
 
 		auto type = mSelectedNode->GetType();
 
+		ImGui::SliderFloat("Width", &mSelectedNode->ComputedStyle.Width.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Height", &mSelectedNode->ComputedStyle.Height.value, 0.0f, 1080.0f);
+		ImGui::SliderFloat("Max Width", &mSelectedNode->ComputedStyle.MaxWidth.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Max Height", &mSelectedNode->ComputedStyle.MaxHeight.value, 0.0f, 1080.0f);
+		ImGui::SliderFloat("Min Width", &mSelectedNode->ComputedStyle.MinWidth.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Min Height", &mSelectedNode->ComputedStyle.MinHeight.value, 0.0f, 1080.0f);
+
+		ImGui::SliderFloat("Padding Left", &mSelectedNode->ComputedStyle.PaddingLeft.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Padding Right", &mSelectedNode->ComputedStyle.PaddingRight.value, 0.0f, 1080.0f);
+		ImGui::SliderFloat("Padding Top", &mSelectedNode->ComputedStyle.PaddingTop.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Padding Bottom", &mSelectedNode->ComputedStyle.PaddingBottom.value, 0.0f, 1080.0f);
+
+		ImGui::SliderFloat("Margin Left", &mSelectedNode->ComputedStyle.MarginLeft.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Margin Right", &mSelectedNode->ComputedStyle.MarginRight.value, 0.0f, 1080.0f);
+		ImGui::SliderFloat("Margin Top", &mSelectedNode->ComputedStyle.MarginTop.value, 0.f, 1920.0f);
+		ImGui::SliderFloat("Margin Bottom", &mSelectedNode->ComputedStyle.MarginBottom.value, 0.0f, 1080.0f);
+
+		ImGui::SliderFloat("Flex Basis", &mSelectedNode->ComputedStyle.FlexBasis, 0.f, 1920.0f);
+		ImGui::SliderFloat("Flex Grow", &mSelectedNode->ComputedStyle.FlexGrow, 0.0f, 1080.0f);
+		ImGui::SliderFloat("Flex Shrink", &mSelectedNode->ComputedStyle.FlexShrink, 0.f, 1920.0f);
+		ImGui::SliderFloat("Font Size", &mSelectedNode->ComputedStyle.FontSize, 0.0f, 1080.0f);
+
 		ImGui::ColorEdit4("Background Color", (float*) &mSelectedNode->ComputedStyle.BackgroundColor);
-		ImGui::Separator();
 		ImGui::DragFloat("Border Size", &mSelectedNode->ComputedStyle.BorderSize, 1.f, 0.f);
 		ImGui::ColorEdit4("Border Color", (float*)&mSelectedNode->ComputedStyle.BorderColor);
 		ImGui::DragFloat("Font Size", &mSelectedNode->ComputedStyle.FontSize, 1.f, 0.f);

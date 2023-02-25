@@ -142,6 +142,8 @@ namespace NuakeUI
 			glScissor(scissorX, scissorY, scissorW, scissorH);
 		}
 
+		// TODO: Keep overflow until we get out of here
+
 		mVertexArray->Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 6);		
 		mVertexArray->Unbind();
